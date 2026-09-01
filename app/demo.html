@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>화석 탐구 수업 — 블록 데모</title>
+  <link rel="stylesheet" href="./src/fossil-explorer.css" />
+  <style>
+    body { font: 15px/1.6 system-ui, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px; }
+    .demo-step { border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px; margin: 16px 0; }
+    .demo-step h2 { margin: 0 0 4px; font-size: 1rem; }
+    .demo-missing { color: #b91c1c; font-size: .85rem; }
+    .demo-summary { background: #f1f5f9; border-radius: 8px; padding: 8px; font-size: .8rem; white-space: pre-wrap; }
+    button.demo-reset { margin-bottom: 16px; }
+    .fx-btn { padding: 10px 16px; border-radius: 10px; border: 0; background: #4f46e5; color: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>화석 탐구 수업 — 블록 데모</h1>
+  <button class="demo-reset" onclick="localStorage.clear(); location.reload()">상태 초기화</button>
+  <div id="mount"></div>
+  <script type="module" src="./src/demo.js"></script>
+</body>
+</html>
