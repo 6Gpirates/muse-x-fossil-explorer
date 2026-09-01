@@ -21,6 +21,8 @@ npm test          # 로직 테스트 (Node 22.4+)
 npm run serve     # http://localhost:8000/app/demo.html
 ```
 
+`npm run serve` 는 Python 3 필요 (`python -m http.server`). Python이 없으면 `npx http-server .` 등 다른 정적 서버를 써도 됩니다.
+
 의존성 0. 빌드 없음.
 
 ## 뮤즈엑스 병합

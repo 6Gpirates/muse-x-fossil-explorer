@@ -9,16 +9,24 @@ async function resolvePool(block) {
   return data[block.poolRef || 'habitats'];
 }
 
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  node.className = className;
+  if (text != null) node.textContent = text;
+  return node;
+}
+
 function resultCard(h) {
-  const el = document.createElement('div');
-  el.className = 'fx-habitat-card';
-  el.innerHTML = `
-    <div class="fx-habitat-icon">${h.icon}</div>
-    <div class="fx-habitat-tag">Assigned Habitat</div>
-    <h3 class="fx-habitat-name">${h.korName}</h3>
-    <div class="fx-habitat-eng">${h.engName}</div>
-    <p class="fx-habitat-desc">${h.desc}</p>`;
-  return el;
+  const card = document.createElement('div');
+  card.className = 'fx-habitat-card';
+  card.append(
+    el('div', 'fx-habitat-icon', h.icon),
+    el('div', 'fx-habitat-tag', 'Assigned Habitat'),
+    el('h3', 'fx-habitat-name', h.korName),
+    el('div', 'fx-habitat-eng', h.engName),
+    el('p', 'fx-habitat-desc', h.desc),
+  );
+  return card;
 }
 
 export const drawHabitat = {

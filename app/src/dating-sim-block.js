@@ -39,20 +39,46 @@ function particleGrid(parentPercent) {
 function refTable(rows) {
   const t = document.createElement('table');
   t.className = 'fx-halflife-table';
-  t.innerHTML =
-    '<caption>반감기 참고 표</caption>' +
-    rows.map((r) => `<tr><td>${r.label}</td><td>${r.value}</td></tr>`).join('');
+  const caption = document.createElement('caption');
+  caption.textContent = '반감기 참고 표';
+  t.appendChild(caption);
+  for (const r of rows) {
+    const tr = document.createElement('tr');
+    const td1 = document.createElement('td');
+    td1.textContent = r.label;
+    const td2 = document.createElement('td');
+    td2.textContent = r.value;
+    tr.append(td1, td2);
+    t.appendChild(tr);
+  }
   return t;
+}
+
+function labelled(labelText, valueText) {
+  const p = document.createElement('p');
+  const b = document.createElement('b');
+  b.textContent = labelText;
+  p.append(b, document.createTextNode(' ' + valueText));
+  return p;
 }
 
 function resultView(problem, value) {
   const done = document.createElement('div');
   done.className = 'fx-sim-result ' + (value.correct ? 'is-correct' : 'is-wrong');
-  done.innerHTML = `
-    <p>${value.correct ? '정답입니다!' : '아쉽게도 오답입니다.'}</p>
-    <p><b>측정 연대:</b> ${problem.displayAge}</p>
-    <p><b>지질 시대:</b> ${problem.era}</p>
-    <p class="fx-sim-explain">${problem.explanation}</p>`;
+
+  const verdict = document.createElement('p');
+  verdict.textContent = value.correct ? '정답입니다!' : '아쉽게도 오답입니다.';
+
+  const explain = document.createElement('p');
+  explain.className = 'fx-sim-explain';
+  explain.textContent = problem.explanation;
+
+  done.append(
+    verdict,
+    labelled('측정 연대:', problem.displayAge),
+    labelled('지질 시대:', problem.era),
+    explain,
+  );
   return done;
 }
 
