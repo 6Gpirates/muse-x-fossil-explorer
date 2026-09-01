@@ -26,10 +26,20 @@ test('signalRatio: quizscore (correct/total 우선, 없으면 응답여부 0.6)'
   assert.equal(signalRatio('quizscore', null, null), 0);
 });
 
-test('quizPassed: 응답이 하나라도 있으면 통과', () => {
+test('quizPassed: 응답이 하나라도 있으면 통과 (expectedCount 없음)', () => {
   assert.equal(quizPassed(null), false);
   assert.equal(quizPassed({ answers: {} }), false);
   assert.equal(quizPassed({ answers: { f1: 2 } }), true);
+});
+
+test('quizPassed: expectedCount 지정 시 모든 질문 응답 확인', () => {
+  const answers2of3 = { answers: { f1: 0, f2: 1 } };
+  const answers3of3 = { answers: { f1: 0, f2: 1, f3: 2 } };
+  assert.equal(quizPassed(answers2of3, 3), false); // 2개 < 3개
+  assert.equal(quizPassed(answers2of3, 2), true);  // 2개 >= 2개
+  assert.equal(quizPassed(answers3of3, 3), true);  // 3개 >= 3개
+  assert.equal(quizPassed(answers3of3, 2), true);  // 3개 >= 2개
+  assert.equal(quizPassed(null, 1), false);        // null은 항상 false
 });
 
 test('complete: openedAt 있어야 true', () => {

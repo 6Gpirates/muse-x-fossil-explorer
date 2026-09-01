@@ -38,10 +38,15 @@ export function signalRatio(kind, raw, full) {
   }
 }
 
-export function quizPassed(quizValue) {
+export function quizPassed(quizValue, expectedCount) {
   if (!quizValue) return false;
   const ans = quizValue.answers || quizValue;
-  return !!ans && Object.keys(ans).length > 0;
+  if (!ans) return false;
+  const count = Object.keys(ans).length;
+  if (typeof expectedCount === 'number' && expectedCount > 0) {
+    return count >= expectedCount;
+  }
+  return count > 0;
 }
 
 function clamp01(x) {
@@ -143,16 +148,60 @@ export const cardCollect = {
     const s = value.snapshot;
     const card = document.createElement('div');
     card.className = `fx-card ${value.class}`;
-    card.innerHTML = `
-      <div class="fx-card-foil"></div>
-      <div class="fx-card-stars">${starString(value.stars)} <span>${value.name}</span></div>
-      <div class="fx-card-img">${s.image ? `<img src="${s.image}" alt="${s.name}">` : ''}</div>
-      <div class="fx-card-name">${s.name}</div>
-      <div class="fx-card-meta">
-        <span>타입 ${s.type}</span><span>서식지 ${s.habitat}</span>
-      </div>
-      <div class="fx-card-ability"><b>특수 능력</b> ${s.ability}</div>
-      <div class="fx-card-weak"><b>약점</b> ${s.weakness}</div>`;
+
+    const foil = document.createElement('div');
+    foil.className = 'fx-card-foil';
+    card.appendChild(foil);
+
+    const starsDiv = document.createElement('div');
+    starsDiv.className = 'fx-card-stars';
+    starsDiv.textContent = starString(value.stars) + ' ';
+    const raritySpan = document.createElement('span');
+    raritySpan.textContent = value.name;
+    starsDiv.appendChild(raritySpan);
+    card.appendChild(starsDiv);
+
+    const imgDiv = document.createElement('div');
+    imgDiv.className = 'fx-card-img';
+    if (s.image) {
+      const img = document.createElement('img');
+      img.src = s.image;
+      img.alt = s.name;
+      imgDiv.appendChild(img);
+    }
+    card.appendChild(imgDiv);
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'fx-card-name';
+    nameDiv.textContent = s.name;
+    card.appendChild(nameDiv);
+
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'fx-card-meta';
+    const typeSpan = document.createElement('span');
+    typeSpan.textContent = '타입 ' + s.type;
+    metaDiv.appendChild(typeSpan);
+    const habitatSpan = document.createElement('span');
+    habitatSpan.textContent = '서식지 ' + s.habitat;
+    metaDiv.appendChild(habitatSpan);
+    card.appendChild(metaDiv);
+
+    const abilityDiv = document.createElement('div');
+    abilityDiv.className = 'fx-card-ability';
+    const abilityBold = document.createElement('b');
+    abilityBold.textContent = '특수 능력';
+    abilityDiv.appendChild(abilityBold);
+    abilityDiv.appendChild(document.createTextNode(' ' + s.ability));
+    card.appendChild(abilityDiv);
+
+    const weakDiv = document.createElement('div');
+    weakDiv.className = 'fx-card-weak';
+    const weakBold = document.createElement('b');
+    weakBold.textContent = '약점';
+    weakDiv.appendChild(weakBold);
+    weakDiv.appendChild(document.createTextNode(' ' + s.weakness));
+    card.appendChild(weakDiv);
+
     return card;
   },
 
