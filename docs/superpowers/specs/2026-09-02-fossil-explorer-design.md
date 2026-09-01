@@ -2,7 +2,7 @@
 
 - 작성일: 2026-09-02
 - 작성: 교사(이상욱) + Claude
-- 상태: **검토 대기** (사용자 리뷰 후 구현 계획 작성으로 진행)
+- 상태: **승인됨** (2026-09-02 사용자 검토 완료 → 구현 계획 작성 단계)
 
 ---
 
@@ -338,7 +338,7 @@ muse-x-fossil-explorer/
 
 - 워크스페이스 경로: `R01-교사(Teacher)/D02-과학수업설계(Science Class Design)/P01-화석AI수업(Fossil AI Lesson)/`
 - 이 폴더에서 `git init` (사용자 승인 완료: "저장소 알아서 하시고").
-- 원격: GitHub 선생님 계정에 `muse-x-fossil-explorer` (공개). **계정 핸들 확인 필요** (Padlet은 `gmaestro74`).
+- 원격: `github.com/6Gpirates/muse-x-fossil-explorer` (공개).
 - 새 폴더마다 미니 CLAUDE.md 생성. 워크스페이스 구조지도 재생성.
 
 ## 11. 테스트 계획
