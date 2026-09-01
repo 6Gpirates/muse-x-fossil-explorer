@@ -79,7 +79,7 @@ export const cardCollect = {
     }
 
     const quizValue = readRef(ctx, block.quizRef);
-    if (!quizPassed(quizValue)) {
+    if (!quizPassed(quizValue, block.quizCount)) {
       const lock = document.createElement('p');
       lock.className = 'fx-card-lock';
       lock.textContent = MISSING_QUIZ;
@@ -212,7 +212,7 @@ export const cardCollect = {
   missing(block, value, ctx) {
     if (value && value.openedAt) return '';
     const quizValue = readRef(ctx, block.quizRef);
-    return quizPassed(quizValue) ? MISSING_OPEN : MISSING_QUIZ;
+    return quizPassed(quizValue, block.quizCount) ? MISSING_OPEN : MISSING_QUIZ;
   },
 
   summary(block, value) {

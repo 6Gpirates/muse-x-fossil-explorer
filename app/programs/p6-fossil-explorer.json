@@ -1,0 +1,146 @@
+{
+  "id": "p6-fossil-explorer",
+  "version": "0.1.0",
+  "_note": "화석으로 알아보는 생물 탐구. 신규 블록 draw.habitat / dating.sim / card.collect 필요. 번호·index 위치는 총괄자 확정 대상.",
+  "title": "화석으로 알아보는 생물 탐구",
+  "subtitle": "화석 채집 → 환경·연대 뽑기 → 조사 → 상상해 그리기 → AI 실사화 → 수집 카드",
+  "gradeBand": "middle",
+  "hall": "자연사관 · 화석 전시",
+  "aiType": "image",
+  "estimatedMinutes": 180,
+  "groupMode": "solo-or-pair",
+  "sessions": [
+    {
+      "id": "s1", "no": 1, "title": "화석을 채집하다", "tagline": "과학관에서 내 화석을 고른다",
+      "steps": [
+        { "id": "s1-01", "phase": "collect", "title": "내 화석 사진",
+          "blocks": [
+            { "type": "text", "tone": "plain", "body": "국립중앙과학관을 돌아보며 마음에 드는 화석을 사진으로 찍어 올리세요." },
+            { "type": "capture.photo", "id": "fossil-photo", "label": "내 화석", "groups": [{ "key": "fossil", "label": "내 화석", "min": 1 }] },
+            { "type": "input.short", "id": "fossil-note", "label": "이 화석을 어디서 봤나요? 첫인상은?" }
+          ],
+          "advance": { "requires": ["fossil-photo"] } }
+      ]
+    },
+    {
+      "id": "s2", "no": 2, "title": "환경과 연대를 뽑다", "tagline": "무작위 환경 + 방사성 연대 측정",
+      "steps": [
+        { "id": "s2-01", "phase": "draw", "title": "서식 환경 뽑기",
+          "blocks": [
+            { "type": "text", "tone": "plain", "body": "무작위로 배정받은 환경과 시대에 이 생물이 적응해 살았다고 상상합니다." },
+            { "type": "draw.habitat", "id": "draw-habitat", "label": "서식 환경 뽑기", "poolRef": "habitats" }
+          ],
+          "advance": { "requires": ["draw-habitat"] } },
+        { "id": "s2-02", "phase": "dating", "title": "방사성 연대 측정",
+          "blocks": [
+            { "type": "dating.sim", "id": "dating-sim", "label": "방사성 연대 측정", "problemsRef": "datingProblems", "tableRef": "halfLifeTable" }
+          ],
+          "advance": { "requires": ["dating-sim"] } }
+      ]
+    },
+    {
+      "id": "s3", "no": 3, "title": "환경을 조사하다", "tagline": "이 환경 생물들의 공통점",
+      "steps": [
+        { "id": "s3-01", "phase": "research", "title": "환경 조사",
+          "blocks": [
+            { "type": "text", "tone": "plain", "body": "믿을 수 있는 자료로 이 환경을 조사하세요. 출처를 함께 적습니다." },
+            { "type": "input.long", "id": "env-research", "label": "이 서식 환경은 어떤 곳인가 (기후·지형·특징)", "min": 80 }
+          ],
+          "advance": { "requires": ["env-research"] } },
+        { "id": "s3-02", "phase": "research", "title": "공통 속성",
+          "blocks": [
+            { "type": "input.table", "id": "common-traits", "label": "이 환경 생물들의 공통 속성",
+              "rows": [
+                { "key": "body", "label": "몸의 구조" }, { "key": "food", "label": "먹이·에너지" },
+                { "key": "move", "label": "이동 방법" }, { "key": "temp", "label": "체온·수분 유지" },
+                { "key": "repro", "label": "번식·생존 전략" }
+              ] },
+            { "type": "quiz", "id": "mid-quiz", "label": "환경 적응 개념 확인", "questionsRef": "midQuiz" }
+          ],
+          "advance": { "requires": ["common-traits"] } }
+      ]
+    },
+    {
+      "id": "s4", "no": 4, "title": "생물을 상상해 그리다", "tagline": "공통 속성을 반영한 손그림",
+      "steps": [
+        { "id": "s4-01", "phase": "create", "title": "손그림",
+          "blocks": [
+            { "type": "text", "tone": "plain", "body": "조사한 공통 속성이 드러나도록 이 환경·시대에 살 법한 생물을 그리세요." },
+            { "type": "capture.sketch", "id": "sketch", "label": "내 생물 그리기", "ratio": "4:3", "minStrokes": 12,
+              "guide": "몸의 구조 / 먹이 / 이동 / 체온·수분 / 번식 특징이 보이게" },
+            { "type": "input.short", "id": "bio-intro", "label": "생물 이름 + 한 줄 소개" }
+          ],
+          "advance": { "requires": ["sketch", "bio-intro"] } },
+        { "id": "s4-02", "phase": "create", "title": "카드 정보",
+          "blocks": [
+            { "type": "input.table", "id": "card-info", "label": "카드에 넣을 정보",
+              "rows": [
+                { "key": "name", "label": "이름" }, { "key": "type", "label": "타입" },
+                { "key": "habitat", "label": "서식지" }, { "key": "ability", "label": "특수 능력" },
+                { "key": "weakness", "label": "약점" }
+              ] }
+          ],
+          "advance": { "requires": ["card-info"] } }
+      ]
+    },
+    {
+      "id": "s5", "no": 5, "title": "AI로 되살리다", "tagline": "손그림 → 극실사 사진",
+      "steps": [
+        { "id": "s5-01", "phase": "ai", "title": "프롬프트 만들기",
+          "blocks": [
+            { "type": "ai.prompt", "id": "realism-prompt", "label": "극실사 프롬프트", "join": "\n",
+              "fields": [
+                { "key": "desc", "label": "내가 복원한 생물 설명", "placeholder": "생김새·크기·특징" },
+                { "key": "habitat", "label": "서식 환경", "placeholder": "뽑은 환경" },
+                { "key": "era", "label": "생존 연대·적응 특징", "placeholder": "연대 + 적응 포인트" }
+              ] },
+            { "type": "ai.launch", "id": "realism-launch", "label": "이미지 도구 열기", "promptRef": "realism-prompt", "url": "", "tool": "(교사 지정)" }
+          ],
+          "advance": { "requires": [] } },
+        { "id": "s5-02", "phase": "ai", "title": "결과 이미지",
+          "blocks": [
+            { "type": "ai.collect", "id": "ai-image", "label": "완성 이미지 업로드", "accept": ["file", "url"], "promptRef": "realism-prompt" },
+            { "type": "compare", "id": "sketch-vs-ai", "label": "손그림 ↔ 실사 비교",
+              "left": { "label": "손그림", "ref": "sketch" }, "right": { "label": "AI 실사", "ref": "ai-image" },
+              "checks": [
+                { "key": "silhouette", "label": "실루엣이 유지됐나" },
+                { "key": "ratio", "label": "신체 비율이 맞나" },
+                { "key": "traits", "label": "적응 특징이 반영됐나" }
+              ],
+              "note": { "label": "느낀 점", "hint": "무엇이 잘/덜 반영됐는지" } }
+          ],
+          "advance": { "requires": ["ai-image"] } }
+      ]
+    },
+    {
+      "id": "s6", "no": 6, "title": "카드를 획득하다", "tagline": "퀴즈 통과 → 카드 개봉",
+      "steps": [
+        { "id": "s6-01", "phase": "quiz", "title": "종합 퀴즈",
+          "blocks": [
+            { "type": "text", "tone": "plain", "body": "퀴즈를 통과하면 나만의 생물 카드를 개봉합니다." },
+            { "type": "quiz", "id": "final-quiz", "label": "생물·환경·지질시대 종합 퀴즈", "questionsRef": "finalQuiz" }
+          ],
+          "advance": { "requires": ["final-quiz"] } },
+        { "id": "s6-02", "phase": "collect", "title": "카드 개봉",
+          "blocks": [
+            { "type": "card.collect", "id": "card-collect", "label": "생물 카드 개봉",
+              "imageRef": "ai-image", "infoRef": "card-info", "quizRef": "final-quiz", "rarityRef": "rarity",
+              "quizCount": 5,
+              "signals": [
+                { "ref": "sketch", "kind": "strokes", "weight": 20, "full": 36 },
+                { "ref": "bio-intro", "kind": "textlen", "weight": 15, "full": 120 },
+                { "ref": "card-info", "kind": "fields", "weight": 15 },
+                { "ref": "common-traits", "kind": "rows", "weight": 10 },
+                { "ref": "final-quiz", "kind": "quizscore", "weight": 10 }
+              ] },
+            { "type": "submit", "id": "final-submit", "label": "최종 제출" }
+          ],
+          "advance": { "requires": ["final-quiz", "card-collect"] } }
+      ]
+    }
+  ],
+  "deliverable": {
+    "collect": ["fossil-photo", "draw-habitat", "dating-sim", "env-research", "common-traits", "sketch", "card-info", "ai-image", "sketch-vs-ai", "final-quiz", "card-collect"],
+    "export": ["pdf", "zip", "csv"]
+  }
+}
