@@ -39,6 +39,17 @@ test('퀴즈: answer 인덱스가 choices 범위 안', () => {
   }
 });
 
+test('datingProblems: 정답 = 반감기값 × 반감기횟수, 모원소%↔반감기횟수 (I4)', () => {
+  for (const p of data.datingProblems) {
+    assert.equal(p.correctAnswer, p.halfLifeVal * p.halfLifeCount,
+      `${p.element}: correctAnswer 불일치`);
+    assert.equal(p.parentPercent === 50, p.halfLifeCount === 1,
+      `${p.element}: 50% ⟺ 반감기 1회`);
+    assert.equal(p.parentPercent === 25, p.halfLifeCount === 2,
+      `${p.element}: 25% ⟺ 반감기 2회`);
+  }
+});
+
 test('realismPrompt 존재', () => {
   assert.ok(typeof data.realismPrompt === 'string' && data.realismPrompt.length > 200);
 });

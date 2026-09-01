@@ -47,6 +47,37 @@ test('블록 id 중복 없음', () => {
   assert.equal(ids.length, new Set(ids).size);
 });
 
+test('I1: s5-01 에 고정 극실사 프롬프트 본문(text 블록)이 존재', () => {
+  const s501 = prog.sessions.flatMap((s) => s.steps).find((st) => st.id === 's5-01');
+  const hit = s501.blocks.some(
+    (b) => typeof b.body === 'string'
+      && (b.body.includes('극실사') || b.body.includes('National Geographic')),
+  );
+  assert.ok(hit, 's5-01 에 극실사 프롬프트 본문 text 블록이 없음');
+  // 딜리버러블/게이트에 추가하지 않았는지 확인 (text 는 산출물이 아님)
+  assert.ok(!prog.deliverable.collect.includes('realism-guide'));
+});
+
+test('I2: quiz 블록은 인라인 questions 배열을 갖고 questionsRef 는 없다', () => {
+  const quizzes = allBlocks().filter((b) => b.type === 'quiz');
+  assert.ok(quizzes.length >= 2);
+  for (const q of quizzes) {
+    assert.ok(!('questionsRef' in q), `${q.id} 에 questionsRef 잔존`);
+    assert.ok(Array.isArray(q.questions) && q.questions.length > 0, `${q.id} questions 비어있음`);
+    for (const item of q.questions) {
+      assert.ok(Number.isInteger(item.answer), `${q.id} answer 정수 아님`);
+      assert.ok(item.answer >= 0 && item.answer < item.choices.length, `${q.id} answer 범위 밖`);
+    }
+  }
+});
+
+test('I2: final-quiz 5문항 = card.collect.quizCount', () => {
+  const fq = allBlocks().find((b) => b.id === 'final-quiz');
+  const card = allBlocks().find((b) => b.type === 'card.collect');
+  assert.equal(fq.questions.length, 5);
+  assert.equal(fq.questions.length, card.quizCount);
+});
+
 test('card.collect 의 quizCount 가 콘텐츠 finalQuiz 길이와 일치', async () => {
   const content = JSON.parse(
     await readFile(new URL('../app/content/fossil-explorer.json', import.meta.url), 'utf8'),

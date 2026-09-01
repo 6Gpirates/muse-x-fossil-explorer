@@ -1,7 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { datingSim, gradeAnswer } from '../app/src/dating-sim-block.js';
 import { makeCtx } from './helpers/mock-ctx.mjs';
+
+const CONTENT = JSON.parse(
+  await readFile(new URL('../app/content/fossil-explorer.json', import.meta.url), 'utf8'),
+);
 
 const P = {
   element: '탄소-14 (¹⁴C) → 질소-14 (¹⁴N)', ratioText: '1 : 1 (모원소 50% 잔여)',
@@ -10,6 +15,15 @@ const P = {
 };
 const block = { id: 'dating-sim', label: '방사성 연대 측정', problemsRef: 'datingProblems' };
 const ctx = makeCtx();
+
+test('gradeAnswer: 실제 5문제 전부 정답/콤마형/오답 채점 (I4)', () => {
+  assert.equal(CONTENT.datingProblems.length, 5);
+  for (const p of CONTENT.datingProblems) {
+    assert.equal(gradeAnswer(String(p.correctAnswer), p.correctAnswer), true);
+    assert.equal(gradeAnswer(p.correctAnswer.toLocaleString('en-US'), p.correctAnswer), true);
+    assert.equal(gradeAnswer(String(p.correctAnswer + 1), p.correctAnswer), false);
+  }
+});
 
 test('gradeAnswer: 콤마·공백·단위 텍스트 허용', () => {
   assert.equal(gradeAnswer('5700', 5700), true);

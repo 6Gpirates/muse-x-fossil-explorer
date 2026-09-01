@@ -1,5 +1,5 @@
 import { get, set } from './state.js';
-import { computeRarity } from './rarity.js';
+import { computeRarity, clamp01 } from './rarity.js';
 import { loadFossilData } from './fossil-data.js';
 
 const MISSING_QUIZ = '퀴즈를 먼저 완료하세요.';
@@ -47,11 +47,6 @@ export function quizPassed(quizValue, expectedCount) {
     return count >= expectedCount;
   }
   return count > 0;
-}
-
-function clamp01(x) {
-  if (!Number.isFinite(x)) return 0;
-  return x < 0 ? 0 : x > 1 ? 1 : x;
 }
 
 function readRef(ctx, ref) {
@@ -116,11 +111,14 @@ export const cardCollect = {
   async _open(block, ctx) {
     const data = await loadFossilData();
     const rar = data[block.rarityRef || 'rarity'];
-    const parts = block.signals.map((sig) => ({
+    const sigs = block.signals || [];
+    const parts = sigs.map((sig) => ({
       weight: sig.weight,
       ratio: signalRatio(sig.kind, readRef(ctx, sig.ref), sig.full),
     }));
-    const luckKey = (block.luckKeyPrefix || 'card') + '::' + block.id;
+    // TODO(Plan 2): confirm which ctx field carries per-student/group identity on the real MuseX platform
+    const who = ctx.studentKey ?? ctx.student?.id ?? ctx.groupKey ?? block.luckKeyPrefix ?? 'anon';
+    const luckKey = who + '::' + block.id;
     const result = computeRarity({ parts, luckKey, luckWeight: rar.luckWeight, tiers: rar.tiers });
 
     const info = readRef(ctx, block.infoRef) || {};
@@ -217,11 +215,12 @@ export const cardCollect = {
 
   summary(block, value) {
     if (!this.complete(block, value)) return null;
+    const s = value.snapshot || {};
     return {
       kind: 'image',
       label: block.label,
-      src: value.snapshot.image,
-      caption: `${value.snapshot.name} · ${value.stars}★ ${value.name}`,
+      src: s.image,
+      caption: `${s.name} · ${value.stars}★ ${value.name}`,
     };
   },
 };

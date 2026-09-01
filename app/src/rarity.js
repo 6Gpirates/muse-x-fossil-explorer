@@ -20,7 +20,8 @@ export function luckRoll(key, weight) {
   return Math.round(seededUnit(String(key)) * weight);
 }
 
-function clamp01(x) {
+/** 비유한수 → 0, 그 외 [0,1]로 클램프 */
+export function clamp01(x) {
   if (!Number.isFinite(x)) return 0;
   return x < 0 ? 0 : x > 1 ? 1 : x;
 }

@@ -14,6 +14,27 @@ function stubInput(block) {
   wrap.append(ta);
   return wrap;
 }
+// card.collect._open 는 값에서 value.rows[key] 를 읽는다 → 표 형태 스텁이 필요.
+function stubRows(block) {
+  const wrap = document.createElement('div');
+  for (const key of block.rowKeys) {
+    const row = document.createElement('label');
+    row.style.display = 'block';
+    row.textContent = key + ' ';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.value = (get(block.id) && get(block.id).rows && get(block.id).rows[key]) || '';
+    inp.addEventListener('input', () => {
+      const v = get(block.id) || { rows: {} };
+      v.rows = v.rows || {};
+      v.rows[key] = inp.value;
+      set(block.id, v);
+    });
+    row.append(inp);
+    wrap.append(row);
+  }
+  return wrap;
+}
 function stubSketch(block) {
   const wrap = document.createElement('div');
   const btn = document.createElement('button');
@@ -58,8 +79,10 @@ const ctx = {
 const STEPS = [
   { id: 'bio-intro', kind: 'stub-input', label: '생물 이름·소개' },
   { id: 'sketch', kind: 'stub-sketch', label: '손그림' },
-  { id: 'card-info', kind: 'stub-input', label: '카드 정보(이름 등)' },
-  { id: 'common-traits', kind: 'stub-input', label: '공통 속성표' },
+  { id: 'card-info', kind: 'stub-rows', label: '카드 정보(이름 등)',
+    rowKeys: ['이름', '타입', '서식지', '특수 능력', '약점'] },
+  { id: 'common-traits', kind: 'stub-rows', label: '공통 속성표',
+    rowKeys: ['몸의 구조', '먹이·에너지', '이동 방법', '체온·수분 유지', '번식·생존 전략'] },
   { id: 'draw-habitat', kind: 'draw', label: '서식 환경 뽑기', poolRef: 'habitats' },
   { id: 'dating-sim', kind: 'dating', label: '방사성 연대 측정', problemsRef: 'datingProblems', tableRef: 'halfLifeTable' },
   { id: 'final-quiz', kind: 'stub-quiz', label: '종합 퀴즈' },
@@ -82,7 +105,17 @@ const mount = document.getElementById('mount');
 async function renderAll() {
   DATA = DATA || (await loadFossilData());
   // ai-image 가짜 값 하나 넣어두기(업로드 블록 대체)
-  if (!get('ai-image')) set('ai-image', { url: 'https://placehold.co/400x300?text=AI+image' });
+  // 데모는 네트워크 요청을 전혀 하지 않는다 → 인라인 SVG 자리표시자
+  const PLACEHOLDER_IMG =
+    'data:image/svg+xml,' +
+    encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">' +
+        '<rect width="400" height="300" fill="#9ca3af"/>' +
+        '<text x="200" y="150" font-family="sans-serif" font-size="24" fill="#f9fafb" ' +
+        'text-anchor="middle" dominant-baseline="middle">AI image</text>' +
+        '</svg>',
+    );
+  if (!get('ai-image')) set('ai-image', { url: PLACEHOLDER_IMG });
   mount.innerHTML = '';
   for (const step of STEPS) {
     const box = document.createElement('div');
@@ -96,6 +129,7 @@ async function renderAll() {
     else if (step.kind === 'dating') body = await datingSim.render(step, ctx);
     else if (step.kind === 'card') body = await cardCollect.render(step, ctx);
     else if (step.kind === 'stub-input') body = stubInput(step);
+    else if (step.kind === 'stub-rows') body = stubRows(step);
     else if (step.kind === 'stub-sketch') body = stubSketch(step);
     else if (step.kind === 'stub-quiz') body = stubQuiz(step, DATA);
     box.append(body);

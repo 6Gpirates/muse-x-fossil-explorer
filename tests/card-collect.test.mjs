@@ -1,7 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { cardCollect, signalRatio, quizPassed } from '../app/src/card-collect-block.js';
+import { computeRarity } from '../app/src/rarity.js';
 import { makeCtx } from './helpers/mock-ctx.mjs';
+
+const CONTENT = JSON.parse(
+  await readFile(new URL('../app/content/fossil-explorer.json', import.meta.url), 'utf8'),
+);
+// loadFossilData 는 fetch 로 콘텐츠를 읽는다 (Node 에서 file: fetch 불가) → 스텁.
+globalThis.fetch = async () => ({ ok: true, json: async () => CONTENT });
 
 test('signalRatio: strokes (배열 길이 또는 strokeCount)', () => {
   assert.equal(signalRatio('strokes', { strokes: new Array(18) }, 36), 0.5);
@@ -64,4 +72,50 @@ test('summary: image, 이름·별·등급 캡션', () => {
   assert.equal(s.kind, 'image');
   assert.equal(s.src, 'data:img');
   assert.equal(s.caption, '눈보라늑대 · 4★ 슈퍼레어');
+});
+
+test('summary: 미완료면 null (M2 스냅샷 가드 포함)', () => {
+  assert.equal(cardCollect.summary({ id: 'c' }, null), null);
+  // snapshot 이 없어도 터지지 않는다
+  const s = cardCollect.summary({ id: 'c', label: 'x' }, { openedAt: 'x', stars: 2, name: '노멀' });
+  assert.equal(s.kind, 'image');
+});
+
+test('C1: 행운 굴림이 who(학생/그룹 식별자)에 따라 달라진다 — 상수가 아니다', () => {
+  const { tiers, luckWeight } = CONTENT.rarity;
+  // _open 의 키 구성(who + "::" + block.id)을 그대로 흉내
+  const rollFor = (who, id) =>
+    computeRarity({ parts: [], luckKey: who + '::' + id, luckWeight, tiers }).luckRoll;
+  const sampleKeys = ['card-collect', 'card', 'grp-1', 'grp-2', 'stu-42'];
+  const differs = sampleKeys.some((id) => rollFor('a', id) !== rollFor('b', id));
+  assert.ok(differs, 'who 가 바뀌어도 모든 표본에서 luckRoll 이 동일 → 가챠 무작위성 없음');
+});
+
+test('_open: 형제 블록 값으로 카드 값 산출 (I4)', async () => {
+  const block = {
+    id: 'card-collect', rarityRef: 'rarity',
+    imageRef: 'ai-image', infoRef: 'card-info', quizRef: 'final-quiz',
+    signals: [
+      { ref: 'sketch', kind: 'strokes', weight: 20, full: 36 },
+      { ref: 'bio-intro', kind: 'textlen', weight: 15, full: 120 },
+      { ref: 'card-info', kind: 'fields', weight: 15 },
+      { ref: 'common-traits', kind: 'rows', weight: 10 },
+      { ref: 'final-quiz', kind: 'quizscore', weight: 10 },
+    ],
+  };
+  const values = {
+    sketch: { strokes: new Array(30).fill([0, 0]) },
+    'bio-intro': { text: 'x'.repeat(120) },
+    'card-info': { rows: { 이름: '가', 타입: '물', 서식지: '심해', '특수 능력': 'a', 약점: 'b' } },
+    'common-traits': { rows: { a: 'x', b: 'y', c: 'z', d: 'w', e: 'v' } },
+    'final-quiz': { correct: 5, total: 5 },
+    'ai-image': { url: 'data:img' },
+  };
+  const ctx = makeCtx({ getValue: (ref) => values[ref] ?? null });
+  const v = await cardCollect._open(block, ctx);
+  assert.ok(v.openedAt);
+  assert.ok(v.stars >= 1 && v.stars <= 5);
+  assert.ok(v.detailScore >= 0 && v.detailScore <= 70);
+  assert.ok(v.total <= 100);
+  assert.equal(v.snapshot.name, '가');
 });
