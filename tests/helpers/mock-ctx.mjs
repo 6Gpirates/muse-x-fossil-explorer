@@ -4,6 +4,7 @@ export function makeCtx(overrides = {}) {
     refreshFooter() {},
     assembledPrompt() { return ''; },
     summaryOf() { return null; },
+    getValue() { return null; },
     peers() { return []; },
     publishPeer() {},
     onTeardown() {},
