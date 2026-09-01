@@ -19,3 +19,37 @@ export function seededUnit(str) {
 export function luckRoll(key, weight) {
   return Math.round(seededUnit(String(key)) * weight);
 }
+
+function clamp01(x) {
+  if (!Number.isFinite(x)) return 0;
+  return x < 0 ? 0 : x > 1 ? 1 : x;
+}
+
+/** parts: Array<{weight, ratio}> → 반올림된 가중합 */
+export function detailScore(parts) {
+  const raw = parts.reduce((sum, p) => sum + p.weight * clamp01(p.ratio), 0);
+  return Math.round(raw);
+}
+
+/** tiers(오름차순 min) 중 total 이상인 최고 등급 */
+export function pickTier(total, tiers) {
+  let chosen = tiers[0];
+  for (const t of tiers) if (total >= t.min) chosen = t;
+  return chosen;
+}
+
+/** 실력 + 운 → 등급 */
+export function computeRarity({ parts, luckKey, luckWeight, tiers }) {
+  const d = detailScore(parts);
+  const l = luckRoll(luckKey, luckWeight);
+  const total = Math.min(100, d + l);
+  const tier = pickTier(total, tiers);
+  return {
+    detailScore: d,
+    luckRoll: l,
+    total,
+    stars: tier.stars,
+    name: tier.name,
+    class: tier.class,
+  };
+}
