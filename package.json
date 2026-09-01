@@ -1,0 +1,12 @@
+{
+  "name": "muse-x-fossil-explorer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MuseX 학습 플랫폼 — 화석으로 알아보는 생물 탐구 (신규 프로그램 모듈)",
+  "engines": { "node": ">=22.4" },
+  "scripts": {
+    "test": "node --test tests/",
+    "serve": "python -m http.server 8000 --directory ."
+  }
+}
