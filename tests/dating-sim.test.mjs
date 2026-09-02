@@ -11,7 +11,7 @@ const CONTENT = JSON.parse(
 const P = {
   element: '탄소-14 (¹⁴C) → 질소-14 (¹⁴N)', ratioText: '1 : 1 (모원소 50% 잔여)',
   parentPercent: 50, unit: '년', correctAnswer: 5700, displayAge: '약 5,700년 전',
-  era: '신생대 제4기 (후기 플라이스토세)', explanation: '…',
+  era: '신생대 제4기 (홀로세)', explanation: '…',
 };
 const block = { id: 'dating-sim', label: '방사성 연대 측정', problemsRef: 'datingProblems' };
 const ctx = makeCtx();
