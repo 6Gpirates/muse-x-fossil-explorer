@@ -6,9 +6,9 @@
    검토용이므로 라우팅·저장·인증은 없다. */
 
 // 블록 모듈은 캐시가 끈질겨 버전 쿼리를 붙인다. 블록 파일을 고치면 이 숫자를 올린다.
-import { drawHabitat } from './draw-habitat-block.js?b=5';
-import { datingSim } from './dating-sim-block.js?b=5';
-import { cardCollect } from './card-collect-block.js?b=5';
+import { drawHabitat } from './draw-habitat-block.js?b=6';
+import { datingSim } from './dating-sim-block.js?b=6';
+import { cardCollect } from './card-collect-block.js?b=6';
 import { get, set, _clear } from './state.js';
 import { loadFossilData } from './fossil-data.js';
 
@@ -42,6 +42,12 @@ const SAMPLE_PEERS = [
     creatureDesc: '빛이 닿지 않는 심해에 사는 육식 어류. 등에 달린 발광 돌기로 먹이를 유인하고, 젤리 같은 몸으로 높은 수압을 견딘다. 거의 움직이지 않고 매복해 에너지를 아끼며, 큰 입으로 자기 몸집만 한 먹이도 삼킨다.',
     cardInfo: { type: '어둠', habitat: '심해', ability: '발광 유인', weakness: '수면의 빛' },
     traits: { body: '젤리질 몸·큰 입', food: '매복 사냥', move: '거의 정지, 지느러미 미세 조절', temp: '저수온에 적응한 대사', repro: '알을 물기둥에 띄워 산란' },
+    envQuiz: [
+      { q: '심해 환경의 특징으로 옳은 것은?', choices: ['빛이 거의 없고 수압이 매우 높다', '수온 변화가 크고 햇빛이 강하다', '산소와 먹이가 풍부하다', '해조류가 무성하다'], answer: 0, why: '심해는 빛이 닿지 않고 깊이만큼 수압이 커집니다.' },
+      { q: '심해에서 먹이 사슬의 시작이 빈약한 까닭은?', choices: ['광합성하는 식물이 거의 없어서', '포식자가 너무 많아서', '물이 너무 짜서', '온도가 높아서'], answer: 0, why: '빛이 없어 광합성 생산자가 없고, 위에서 내려오는 유기물에 의존합니다.' },
+      { q: '심해 생물이 주로 어두운 색이거나 투명한 까닭은?', choices: ['어둠 속에서 눈에 띄지 않기 위해', '체온을 높이기 위해', '햇빛을 반사하려고', '물을 정화하려고'], answer: 0, why: '포식·피식 모두에서 몸을 숨기는 데 유리합니다.' },
+      { q: '심해의 높은 수압에 견디는 몸의 특징은?', choices: ['공기주머니 대신 물렁한 젤리질 조직', '두꺼운 근육질 껍데기', '커다란 폐', '빽빽한 털'], answer: 0, why: '압축되는 공기 공간이 적을수록 수압에 안전합니다.' },
+    ],
   },
   {
     id: 'p2', name: '박도윤', habitat: '사막', color: '#7c4a13',
@@ -49,13 +55,25 @@ const SAMPLE_PEERS = [
     creatureDesc: '한낮의 열기를 피해 모래 속에 몸을 묻고, 밤에 나와 이슬과 다육식물을 먹는다. 두꺼운 등딱지와 각질 피부로 수분 손실을 막고, 오줌을 거의 누지 않아 물을 아낀다.',
     cardInfo: { type: '땅', habitat: '사막', ability: '모래 잠복', weakness: '장마' },
     traits: { body: '두꺼운 등딱지·각질 피부', food: '다육식물·이슬', move: '느린 보행, 모래 파기', temp: '낮에 굴속, 밤에 활동', repro: '모래에 알을 묻어 부화' },
+    envQuiz: [
+      { q: '사막 환경의 가장 큰 특징은?', choices: ['매우 건조하고 일교차가 크다', '항상 습하고 따뜻하다', '서늘하고 흐리다', '강수량이 많다'], answer: 0, why: '사막은 비가 적고 낮과 밤 기온 차가 큽니다.' },
+      { q: '사막 동물이 낮에 굴속에 머무는 주된 이유는?', choices: ['뜨거운 열과 수분 손실을 피하려고', '굴속에 먹이가 많아서', '빛이 싫어서', '포식자가 낮에만 활동해서'], answer: 0, why: '한낮 지표는 매우 뜨겁고 건조합니다.' },
+      { q: '사막 동물의 수분 절약 방법으로 알맞은 것은?', choices: ['오줌을 진하게 농축해 조금만 배출', '땀을 많이 흘림', '물을 자주 마심', '잎을 넓게 폄'], answer: 0, why: '배출로 잃는 물을 최소화하는 방향으로 적응합니다.' },
+      { q: '사막 여우처럼 귀가 큰 동물이 유리한 까닭은?', choices: ['넓은 귀 표면으로 열을 방출해 체온을 낮춤', '소리를 더 잘 듣기 위해서만', '몸을 숨기려고', '먹이를 더 먹으려고'], answer: 0, why: '표면적이 큰 부위로 열을 내보내 더위를 견딥니다.' },
+    ],
   },
   {
     id: 'p3', name: '이서아', habitat: '열대우림', color: '#14532d',
     creatureName: '잎무늬표범', stars: 5, envGrade: 5,
     creatureDesc: '나무 위에서 대부분을 보내는 육식동물. 잎맥 무늬 털로 완벽하게 위장하고, 긴 꼬리로 균형을 잡으며 가지 사이를 도약한다. 습한 더위에 적응해 얇은 털과 넓은 발바닥을 가졌다.',
-    cardInfo: { type: '풀', habitat: '열대우림', ability: '잎 위장', weakness: '건기' },
+    cardInfo: { type: '자연', habitat: '열대우림', ability: '잎 위장', weakness: '건기' },
     traits: { body: '잎맥 무늬 털·긴 꼬리', food: '나무 위 소형 포유류', move: '가지 도약·활공', temp: '얇은 털로 발열 억제', repro: '나무 구멍에 새끼를 숨김' },
+    envQuiz: [
+      { q: '열대우림의 특징은?', choices: ['고온다습하고 생물 다양성이 매우 높다', '건조하고 춥다', '계절 변화가 뚜렷하다', '나무가 드물다'], answer: 0, why: '연중 덥고 비가 많아 종 다양성이 큽니다.' },
+      { q: '나무 위에서 사는 동물에게 유리한 몸의 특징은?', choices: ['균형을 잡는 긴 꼬리와 쥐는 발', '넓은 물갈퀴', '두꺼운 지방층', '땅을 파는 큰 발톱'], answer: 0, why: '가지 사이 이동과 균형에 특화됩니다.' },
+      { q: '열대우림 바닥이 어두운 까닭은?', choices: ['울창한 잎이 햇빛을 대부분 가려서', '안개가 늘 짙어서', '화산재 때문에', '밤이 길어서'], answer: 0, why: '상층 나무 지붕(캐노피)이 빛을 차단합니다.' },
+      { q: '열대우림 동물의 화려한 무늬가 하는 역할이 아닌 것은?', choices: ['추위를 막는 단열', '주변과 섞이는 위장', '독이 있다는 경고', '짝 유인'], answer: 0, why: '덥고 습한 곳이라 단열은 필요하지 않습니다.' },
+    ],
   },
   {
     id: 'p4', name: '최지호', habitat: '툰드라 / 극지방', color: '#1e3a5f',
@@ -63,13 +81,25 @@ const SAMPLE_PEERS = [
     creatureDesc: '두꺼운 흰 털과 지방층으로 눈보라를 견디는 초식동물. 넓은 발굽으로 눈 위를 걷고, 뿔로 눈을 파헤쳐 이끼를 먹는다.',
     cardInfo: { type: '얼음', habitat: '툰드라', ability: '방한', weakness: '해빙기' },
     traits: { body: '흰 겉털·두꺼운 지방', food: '이끼·지의류', move: '넓은 발굽 보행', temp: '털·지방 단열', repro: '봄 출산, 무리 보호' },
+    envQuiz: [
+      { q: '툰드라 환경의 특징은?', choices: ['땅속이 얼어 있고 겨울이 매우 길다', '덥고 습하다', '비가 자주 온다', '큰 나무가 빽빽하다'], answer: 0, why: '영구동토와 길고 추운 겨울이 특징입니다.' },
+      { q: '툰드라 동물의 짧은 귀·짧은 다리는 무엇을 위한 적응인가?', choices: ['몸의 표면적을 줄여 열 손실을 막기 위해', '빨리 달리기 위해', '헤엄치기 위해', '먹이를 잡기 위해'], answer: 0, why: '노출 면적을 줄여 체온을 지킵니다.' },
+      { q: '툰드라에 큰 나무가 자라지 못하는 이유는?', choices: ['영구동토와 짧은 생장기', '잦은 산불', '지나친 강수', '토양의 높은 염분'], answer: 0, why: '얼어 있는 땅과 짧은 여름이 뿌리 성장을 막습니다.' },
+      { q: '툰드라 초식동물의 겨울 먹이로 알맞은 것은?', choices: ['눈 아래의 이끼와 지의류', '나무 열매', '물속 조류', '곤충 애벌레'], answer: 0, why: '눈을 헤쳐 이끼·지의류를 찾아 먹습니다.' },
+    ],
   },
   {
     id: 'p5', name: '정하은', habitat: '습지 / 맹그로브', color: '#3f3d1e',
     creatureName: '진흙물떼새악어', stars: 3, envGrade: 4,
     creatureDesc: '담수와 해수가 섞이는 갯벌에 산다. 넓적한 부리로 진흙 속 게와 조개를 파먹고, 물갈퀴 발로 진창을 걷는다. 콧구멍이 머리 위에 있어 몸을 숨긴 채 숨을 쉰다.',
-    cardInfo: { type: '물', habitat: '맹그로브 습지', ability: '진흙 잠복', weakness: '갯벌 매립' },
+    cardInfo: { type: '바다', habitat: '맹그로브 습지', ability: '진흙 잠복', weakness: '갯벌 매립' },
     traits: { body: '넓적 부리·물갈퀴 발', food: '게·조개', move: '진창 보행·짧은 수영', temp: '갯벌 그늘 이용', repro: '갈대밭에 둥지' },
+    envQuiz: [
+      { q: '맹그로브 습지의 특징은?', choices: ['민물과 바닷물이 섞이고 진흙 갯벌이 발달', '건조한 모래언덕', '차가운 빙하 지대', '빛이 없는 깊은 바다'], answer: 0, why: '강 하구의 기수역으로 조수 영향이 큽니다.' },
+      { q: '갯벌 진창을 걷는 동물에게 유리한 발 모양은?', choices: ['넓게 퍼진 물갈퀴 발', '뾰족한 발굽', '갈고리 발톱', '빨판'], answer: 0, why: '넓은 발이 진흙에 빠지지 않게 합니다.' },
+      { q: '조수로 물에 잠겼다 드러났다 하는 환경에 적응한 방법은?', choices: ['머리 위 콧구멍으로 몸을 숨긴 채 숨쉬기', '아가미로만 호흡', '겨울잠', '몸에서 빛을 냄'], answer: 0, why: '수면에 콧구멍만 내놓고 몸을 숨길 수 있습니다.' },
+      { q: '맹그로브 습지의 흔한 먹이는?', choices: ['게와 조개', '나무 수액', '이끼', '플랑크톤만'], answer: 0, why: '진흙 속 갑각류·조개류가 풍부합니다.' },
+    ],
   },
 ];
 
@@ -311,6 +341,21 @@ function envGrader(block) {
 
 /* ── 카드 만들기 (이름·서식지 자동 / 타입·능력·약점 AI 판단) ── */
 const CARD_TYPES = ['물', '불', '땅', '하늘', '자연', '전기', '드래곤', '독', '빛', '어둠', '바다', '얼음'];
+const TYPE_COLOR = {
+  물: '#3b82f6', 불: '#ef4444', 땅: '#a16207', 하늘: '#38bdf8',
+  자연: '#22c55e', 전기: '#f59e0b', 드래곤: '#7c3aed', 독: '#a21caf',
+  빛: '#eab308', 어둠: '#334155', 바다: '#0e7490', 얼음: '#22d3ee',
+};
+function typeColorsOf(typeStr) {
+  return String(typeStr || '').split(/[·,/]/).map((s) => s.trim())
+    .map((t) => TYPE_COLOR[t]).filter(Boolean);
+}
+function typeBarStyle(colors) {
+  if (!colors || !colors.length) return '';
+  return colors.length >= 2
+    ? `linear-gradient(90deg, ${colors[0]}, ${colors[1]})`
+    : colors[0];
+}
 
 function cardMakeBlock(block) {
   const wrap = h('div', null);
@@ -386,6 +431,7 @@ function cardMakeBlock(block) {
         name, habitat,
         typeList: types,
         type: types.join(' · '),
+        typeColors: types.map((t) => TYPE_COLOR[t]).filter(Boolean),
         ability: String(r.ability || '').slice(0, 20) || '적응 특화',
         weakness: String(r.weakness || '').slice(0, 20) || '환경 급변',
       };
@@ -981,8 +1027,11 @@ function creatureCardEl(prof, opts) {
   const src = prof.aiImage || prof.sketch;
   if (src) img.append(h('img', { src, alt: prof.creatureName }));
   card.append(img);
-  card.append(h('div', { class: 'fx-card-name', text: prof.creatureName }));
   const ci = prof.cardInfo || {};
+  const cols = (ci.typeColors && ci.typeColors.length) ? ci.typeColors : typeColorsOf(ci.type);
+  const nameEl = h('div', { class: 'fx-card-name' + (cols.length ? ' fx-card-name--bar' : ''), text: prof.creatureName });
+  if (cols.length) nameEl.style.background = typeBarStyle(cols);
+  card.append(nameEl);
   card.append(h('div', { class: 'fx-card-meta' },
     h('span', { text: '타입 ' + (ci.type || '-') }), h('span', { text: '서식지 ' + (ci.habitat || prof.habitat || '-') })));
   if (opts && opts.onClick) { card.style.cursor = 'pointer'; card.addEventListener('click', opts.onClick); }
@@ -1063,14 +1112,56 @@ function studentDetail(s) {
   return wrap;
 }
 
-/* ── 친구 카드 획득 퀴즈 (세션 6 핵심) ──────────────────── */
+/* ── 친구 카드 획득 퀴즈 ────────────────────────────────────
+   카드별 5문제 = 그 친구가 만든 환경 퀴즈 4개 중 무작위 2개 + 생물 특징 문제 3개.
+   3문제는 '최초 도전자'가 생성하면 pv-cardquiz 에 저장돼 이후 모두 재활용(토큰 절약). */
 function dexState() { return get('pv-dex') || { owned: [], quizzes: {} }; }
+function cardQuizCache() { return get('pv-cardquiz') || {}; }
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+async function buildCardQuiz(peer) {
+  // 이미 누군가 만들어 뒀으면 그대로 재활용
+  const cache = cardQuizCache();
+  if (cache[peer.id] && cache[peer.id].questions) return cache[peer.id].questions;
+
+  // 환경 퀴즈 4개 중 무작위 2개
+  const env = shuffle(peer.envQuiz || []).slice(0, 2);
+  // 생물 특징 문제 3개 생성 (외형·기관이 왜 그렇게 생겼나 ↔ 환경)
+  const tr = Object.values(peer.traits || {}).filter(Boolean).join(', ');
+  let bio = [];
+  if (aiConfig()) {
+    const raw = await generateText(
+      `중학교 과학 수업. 학생이 '${peer.habitat}'에 사는 가상 생물 '${peer.creatureName}'을 만들었다.\n`
+      + `설명: ${peer.creatureDesc}\n신체 특징: ${tr}\n`
+      + '이 생물의 특정 외형·기관·신체 부위가 왜 그렇게 생겼는지를 서식 환경과 엮어서 묻는 4지선다 3문제를 만들어라. '
+      + `예: "${peer.creatureName}의 OOO는 어떤 환경 적응의 결과인가?" 처럼, `
+      + '그 환경을 이해하고 있으면 유추해서 풀 수 있는 문제로. 단순 암기·정의 묻기 금지.\n'
+      + 'JSON 배열만: [{"q":"","choices":["","","",""],"answer":정답인덱스,"why":""}]',
+      true,
+    );
+    bio = (Array.isArray(raw) ? raw : []).slice(0, 3).map((q) => ({
+      q: String(q.q || ''), choices: (q.choices || []).map(String).slice(0, 5),
+      answer: Math.max(0, Math.min((q.choices || []).length - 1, Number(q.answer) || 0)),
+      why: String(q.why || ''),
+    })).filter((q) => q.q && q.choices.length >= 3);
+  }
+  const questions = shuffle([...env, ...bio]).map((q, i) => ({ ...q, key: 'cq' + i }));
+  if (questions.length < 3) throw new Error('문제를 충분히 만들지 못했습니다');
+  set('pv-cardquiz', { ...cache, [peer.id]: { questions } });
+  return questions;
+}
 
 function friendQuizBlock(peer) {
   const wrap = h('div', { class: 'pv-aiwrap pv-friend-quiz' });
   const dex = dexState();
   const owned = (dex.owned || []).includes(peer.id);
-  const qz = (dex.quizzes || {})[peer.id] || {};
+  const attempt = (dex.quizzes || {})[peer.id] || {};
+  const shared = cardQuizCache()[peer.id];
   const status = h('p', { class: 'pv-upl-status' });
 
   if (allStudents().length < 4) {
@@ -1083,34 +1174,17 @@ function friendQuizBlock(peer) {
     wrap.append(h('p', { class: 'pv-quiz-score', text: '✓ 이 카드를 도감북에 획득했습니다.' }));
     return wrap;
   }
-  wrap.append(h('p', { class: 'pv-prose', text: `${peer.creatureName}에 대한 과학 퀴즈 5문제 중 3개 이상 맞히면 이 카드를 얻습니다. 친구의 작품을 잘 살펴본 뒤 푸세요.` }));
+  wrap.append(h('p', { class: 'pv-prose', text: `${peer.creatureName}에 대한 문제 5개(환경 2 + 생물 특징 3) 중 3개 이상 맞히면 이 카드를 얻습니다. 친구의 작품을 잘 살펴본 뒤 푸세요.` }));
 
-  if (!qz.questions) {
-    const gen = h('button', { class: 'pv-btn-mock', type: 'button', text: '퀴즈 생성' });
+  if (!shared || !shared.questions) {
+    const gen = h('button', { class: 'pv-btn-mock', type: 'button', text: '퀴즈 시작' });
     gen.addEventListener('click', async () => {
-      if (!aiConfig()) { status.textContent = 'AI가 설정되지 않았습니다.'; return; }
-      gen.disabled = true; status.textContent = '문제 만드는 중…';
+      gen.disabled = true; status.textContent = '이 카드의 문제를 준비하는 중…';
       try {
-        const tr = Object.values(peer.traits || {}).filter(Boolean).join(', ');
-        const qs = await generateText(
-          `중학교 과학 수업이다. 한 학생이 '${peer.habitat}' 환경에 사는 가상 생물 '${peer.creatureName}'을 만들었다.\n`
-          + `생물 설명: ${peer.creatureDesc}\n공통 속성: ${tr}\n`
-          + '이 생물의 적응·환경·과학 개념을 묻는 4지선다 퀴즈 5문제를 만들어라. '
-          + '친구의 작품 설명을 충분히 읽은 학생이 풀 수 있는 수준으로, 단순 암기가 아니라 이해를 묻게.\n'
-          + 'JSON 배열만: [{"q":"","choices":["","","",""],"answer":정답인덱스,"why":""}]',
-          true,
-        );
-        const clean = (Array.isArray(qs) ? qs : []).slice(0, 5).map((q, i) => ({
-          key: 'fq' + i, q: String(q.q || ''), choices: (q.choices || []).map(String).slice(0, 5),
-          answer: Math.max(0, Math.min((q.choices || []).length - 1, Number(q.answer) || 0)),
-          why: String(q.why || ''),
-        })).filter((q) => q.q && q.choices.length >= 3);
-        if (clean.length < 3) throw new Error('문제를 충분히 만들지 못했습니다');
-        const d = dexState();
-        set('pv-dex', { ...d, quizzes: { ...(d.quizzes || {}), [peer.id]: { questions: clean, answers: {} } } });
+        await buildCardQuiz(peer);
         render();
       } catch (e) {
-        status.textContent = '생성 실패: ' + (e && e.message ? e.message : e);
+        status.textContent = '준비 실패: ' + (e && e.message ? e.message : e);
         gen.disabled = false;
       }
     });
@@ -1118,6 +1192,7 @@ function friendQuizBlock(peer) {
     return wrap;
   }
 
+  const qz = { questions: shared.questions, answers: attempt.answers, correct: attempt.correct };
   const picks = { ...(qz.answers || {}) };
   const graded = typeof qz.correct === 'number';
   const box = h('div', { class: 'pv-quiz' + (graded ? ' reveal' : '') });
@@ -1470,6 +1545,7 @@ async function seedState() {
   set('card-info', { aiMade: true, rows: {
     name: '눈털코뿔소', habitat: '툰드라 / 극지방',
     typeList: ['얼음', '땅'], type: '얼음 · 땅',
+    typeColors: [TYPE_COLOR['얼음'], TYPE_COLOR['땅']],
     ability: '눈폭풍 저항', weakness: '해빙기의 더위',
   } });
   set('ai-image', { url: PLACEHOLDER_IMG });

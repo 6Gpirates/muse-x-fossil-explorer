@@ -127,6 +127,7 @@ export const cardCollect = {
     const snapshot = {
       name: infoRows['이름'] || infoRows.name || '이름 없음',
       type: infoRows['타입'] || infoRows.type || '',
+      typeColors: Array.isArray(infoRows.typeColors) ? infoRows.typeColors.filter(Boolean) : [],
       habitat: infoRows['서식지'] || infoRows.habitat || '',
       ability: infoRows['특수 능력'] || infoRows.ability || '',
       weakness: infoRows['약점'] || infoRows.weakness || '',
@@ -172,6 +173,13 @@ export const cardCollect = {
     const nameDiv = document.createElement('div');
     nameDiv.className = 'fx-card-name';
     nameDiv.textContent = s.name;
+    if (s.typeColors && s.typeColors.length) {
+      // 타입 상징색 — 이름 줄에 카드 좌우 끝까지 이어지는 색 띠(직사각형)
+      nameDiv.classList.add('fx-card-name--bar');
+      nameDiv.style.background = s.typeColors.length >= 2
+        ? `linear-gradient(90deg, ${s.typeColors[0]}, ${s.typeColors[1]})`
+        : s.typeColors[0];
+    }
     card.appendChild(nameDiv);
 
     const metaDiv = document.createElement('div');

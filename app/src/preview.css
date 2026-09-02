@@ -110,6 +110,7 @@ body {
 }
 .pv-mini-card .fx-card-stars { font-size: .72rem; }
 .pv-mini-card .fx-card-name { font-size: .85rem; }
+.pv-mini-card .fx-card-name.fx-card-name--bar { margin-left: -10px; margin-right: -10px; padding: 4px 10px; }
 .pv-mini-card .fx-card-meta { font-size: .68rem; }
 
 .pv-share-detail { display: flex; gap: 18px; flex-wrap: wrap; margin: 12px 0; }
