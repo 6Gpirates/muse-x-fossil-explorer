@@ -6,9 +6,9 @@
    검토용이므로 라우팅·저장·인증은 없다. */
 
 // 블록 모듈은 캐시가 끈질겨 버전 쿼리를 붙인다. 블록 파일을 고치면 이 숫자를 올린다.
-import { drawHabitat } from './draw-habitat-block.js?b=4';
-import { datingSim } from './dating-sim-block.js?b=4';
-import { cardCollect } from './card-collect-block.js?b=4';
+import { drawHabitat } from './draw-habitat-block.js?b=5';
+import { datingSim } from './dating-sim-block.js?b=5';
+import { cardCollect } from './card-collect-block.js?b=5';
 import { get, set, _clear } from './state.js';
 import { loadFossilData } from './fossil-data.js';
 
@@ -434,16 +434,44 @@ async function generateAiJson(promptText, imageUrls) {
 
 const RASTER_RE = /^data:image\/(jpeg|jpg|png|webp);base64,/;
 
-/* ── 화석 ↔ 내 손그림 일치도 (AI, 카드 등급 요소) ─────────── */
-function fossilMatchBlock(block) {
-  const wrap = h('div', { class: 'pv-aiwrap pv-fossil-match' });
-  const status = h('p', { class: 'pv-upl-status' });
-  const st = get(block.id) || {};
+/* ── 화석 ↔ 내 손그림 일치도 (그림 올리면 자동 평가, 카드 등급 요소)
+   결과는 sketch 상태에 {correct,total,matchFeedback} 로 저장한다. */
+const _autoMatchFired = new Set();
+
+async function runFossilMatch(status) {
   const photo = (get('fossil-photo') || {}).url;
   const sketch = (get('sketch') || {}).image;
-  const done = typeof st.correct === 'number';
+  if (!(photo && RASTER_RE.test(photo)) || !(sketch && RASTER_RE.test(sketch)) || !aiConfig()) return;
+  if (status) status.textContent = '화석과 비교해 일치도 평가 중…';
+  try {
+    const desc = (get('bio-desc') || {}).text || '';
+    const r = await generateAiJson(
+      '첫 번째 이미지는 학생이 고른 실제 화석 사진이고, 두 번째 이미지는 그 화석 생물이 다른 환경에 적응해 진화했다고 상상해 학생이 직접 그린 그림이다. '
+      + '두 번째 그림이 첫 번째 화석의 형태적 특징(전체 실루엣, 몸의 구조, 특징적인 부위)을 얼마나 이어받았는지 0~5점(정수)으로 평가하라. '
+      + '학생이 손으로 그린 러프한 스케치임을 충분히 감안해 관대하게, 하지만 완전히 무관하면 낮게. '
+      + (desc ? `참고로 학생의 생물 설명: ${desc}\n` : '')
+      + 'JSON만 출력: {"score": 정수, "feedback": "한국어 한 문장"}',
+      [photo, sketch],
+    );
+    const score = Math.max(0, Math.min(5, Math.round(Number(r.score) || 0)));
+    patch('sketch', { correct: score, total: 5, matchFeedback: String(r.feedback || '') });
+    updateProgress();
+    await render();
+  } catch (e) {
+    if (status) status.textContent = '일치도 평가 실패: ' + (e && e.message ? e.message : e);
+  }
+}
 
-  wrap.append(h('p', { class: 'pv-block-label', text: '화석 ↔ 내 생물 일치도 (AI 판단)' }));
+function fossilMatchBlock() {
+  const wrap = h('div', { class: 'pv-aiwrap pv-fossil-match' });
+  const status = h('p', { class: 'pv-upl-status' });
+  const st = get('sketch') || {};
+  const photo = (get('fossil-photo') || {}).url;
+  const sketch = st.image;
+  const done = typeof st.correct === 'number';
+  const ready = photo && RASTER_RE.test(photo) && sketch && RASTER_RE.test(sketch);
+
+  wrap.append(h('p', { class: 'pv-block-label', text: '내가 고른 화석과 얼마나 닮았나 (AI 평가)' }));
 
   if (done) {
     wrap.append(
@@ -452,44 +480,31 @@ function fossilMatchBlock(block) {
       h('p', { class: 'pv-prose', text: '이 점수는 마지막 카드 등급에 반영됩니다.' }),
     );
     const redo = h('button', { class: 'pv-quiz-reveal-btn', type: 'button', text: '다시 평가' });
-    redo.addEventListener('click', () => { patch(block.id, { correct: undefined, total: undefined, matchFeedback: undefined }); render(); });
+    redo.addEventListener('click', () => {
+      _autoMatchFired.delete('sketch');
+      patch('sketch', { correct: undefined, total: undefined, matchFeedback: undefined });
+      render();
+    });
     wrap.append(redo);
     return wrap;
   }
 
-  if (!(photo && RASTER_RE.test(photo)) || !(sketch && RASTER_RE.test(sketch))) {
-    wrap.append(h('p', { class: 'pv-prose', text: '세션 1의 화석 사진과 세션 4의 손그림(색칠 완성본)을 모두 올리면 AI가 두 그림이 형태적으로 얼마나 이어지는지 평가합니다.' }));
+  if (!ready) {
+    wrap.append(h('p', { class: 'pv-prose', text: '세션 1의 화석 사진이 있어야 그림을 올리는 즉시 일치도를 평가합니다.' }));
     return wrap;
   }
 
-  const btn = h('button', { class: 'pv-btn-mock', type: 'button', text: 'AI 일치도 평가' });
-  btn.addEventListener('click', async () => {
-    if (!aiConfig()) { status.textContent = 'AI가 설정되지 않았습니다.'; return; }
-    btn.disabled = true;
-    status.textContent = '평가 중…';
-    try {
-      const desc = (get('bio-desc') || {}).text || '';
-      const r = await generateAiJson(
-        '첫 번째 이미지는 학생이 고른 실제 화석 사진이고, 두 번째 이미지는 그 화석 생물이 다른 환경에 적응해 진화했다고 상상해 학생이 직접 그린 그림이다. '
-        + '두 번째 그림이 첫 번째 화석의 형태적 특징(전체 실루엣, 몸의 구조, 특징적인 부위)을 얼마나 이어받았는지 0~5점(정수)으로 평가하라. '
-        + '학생이 손으로 그린 러프한 스케치임을 충분히 감안해 관대하게, 하지만 완전히 무관하면 낮게. '
-        + `참고로 학생의 생물 설명: ${desc}\n`
-        + 'JSON만 출력: {"score": 정수, "feedback": "한국어 한 문장"}',
-        [photo, sketch],
-      );
-      const score = Math.max(0, Math.min(5, Math.round(Number(r.score) || 0)));
-      patch(block.id, { correct: score, total: 5, matchFeedback: String(r.feedback || '') });
-      updateProgress();
-      await render();
-    } catch (e) {
-      status.textContent = '평가 실패: ' + (e && e.message ? e.message : e);
-      btn.disabled = false;
-    }
-  });
-  wrap.append(
-    h('p', { class: 'pv-prose', text: '내가 고른 화석과 내가 그린 생물이 형태적으로 얼마나 이어지는지 AI가 봅니다. (러프한 손그림임을 감안해 평가)' }),
-    btn, status,
-  );
+  // 그림이 올라왔고 화석 사진도 있으면 즉시 1회 자동 평가
+  if (!_autoMatchFired.has('sketch')) {
+    _autoMatchFired.add('sketch');
+    status.textContent = '화석과 비교해 일치도 평가 중…';
+    setTimeout(() => runFossilMatch(status), 50);
+  } else {
+    const retry = h('button', { class: 'pv-btn-mock', type: 'button', text: '일치도 평가' });
+    retry.addEventListener('click', () => { runFossilMatch(status); });
+    wrap.append(retry);
+  }
+  wrap.append(status);
   return wrap;
 }
 
@@ -762,8 +777,13 @@ function mockBlock(block) {
       if (block.guide) wrap.append(h('p', { class: 'pv-prose', text: '안내 · ' + block.guide }));
       wrap.append(h('p', { class: 'pv-prose', text:
         '종이·태블릿·그림 앱 어디에 그려도 좋습니다. 반드시 색을 칠해 완성한 뒤, 그 그림을 이미지로 올리세요.' }));
-      // 카드 등급 신호(kind:strokes)가 읽히도록 strokes 배열을 함께 저장한다.
-      wrap.append(imgUploader(st && st.image, block.id, (image) => ({ image, strokes: new Array(36).fill(0) }), '🎨'));
+      // 그림을 올리면 strokes 배열을 함께 저장하고, 자동 일치도 평가가 다시 돌도록 플래그 초기화
+      wrap.append(imgUploader(st && st.image, block.id, (image) => {
+        _autoMatchFired.delete('sketch');
+        return { image, strokes: new Array(36).fill(0), correct: undefined, total: undefined, matchFeedback: undefined };
+      }, '🎨'));
+      // 그림이 올라오면 세션 1 화석 사진과 자동 비교
+      if (st && st.image) wrap.append(fossilMatchBlock());
       return wrap;
     }
 
@@ -884,9 +904,6 @@ function mockBlock(block) {
         wrap.append(regen, status);
         wrap.append(h('p', { class: 'pv-caution', text: '다시 생성할 때마다 이미지가 새로 만들어지며 비용이 발생합니다.' }));
       }
-
-      // 화석 ↔ 손그림 일치도 (AI 판단, 카드 등급 요소)
-      wrap.append(fossilMatchBlock(block));
       return wrap;
     }
 
@@ -1189,7 +1206,7 @@ function topbar() {
   const seed = h('button', { class: 'pv-seed-btn', type: 'button', text: '예시 답안 채우기' });
   seed.addEventListener('click', async () => { seed.disabled = true; await seedState(); await render(); });
   const reset = h('button', { class: 'pv-seed-btn', type: 'button', text: '빈 수업으로 보기' });
-  reset.addEventListener('click', async () => { _clear(); await render(); });
+  reset.addEventListener('click', async () => { _clear(); _autoMatchFired.clear(); await render(); });
   const share = h('button', { class: 'pv-share-btn', type: 'button', text: '👥 공유의 장' });
   share.addEventListener('click', () => { SHARE_VIEW = SHARE_VIEW == null ? 'class' : null; render(); });
 
@@ -1244,7 +1261,13 @@ function blockDone(id) {
   if (CUSTOM[blk.type]) return CUSTOM[blk.type].complete(blk, v, ctx);
   switch (blk.type) {
     case 'capture.photo': return !!(v && v.url);
-    case 'capture.sketch': return !!(v && v.image);
+    case 'capture.sketch': {
+      if (!(v && v.image)) return false;
+      // 화석 사진이 있으면 일치도 평가까지 끝나야 통과
+      const fp = (get('fossil-photo') || {}).url;
+      if (fp && RASTER_RE.test(fp) && aiConfig()) return typeof v.correct === 'number';
+      return true;
+    }
     case 'input.short': return !!(v && (v.text || '').trim().length >= 1);
     case 'input.long': return !!(v && (v.text || '').trim().length >= (blk.min || 1));
     case 'input.table': {
@@ -1256,8 +1279,7 @@ function blockDone(id) {
       if (id === 'final-quiz') return (dexState().owned || []).length >= 1;
       return typeof (v || {}).correct === 'number';
     case 'ai.collect': return !!(get('ai-image') || {}).url;
-    case 'compare':
-      return typeof (v || {}).correct === 'number'; // 화석 일치도 평가 완료
+    case 'compare': return true;
     default: return true;
   }
 }
@@ -1433,7 +1455,12 @@ async function seedState() {
     { key: 'e2', q: '툰드라 초식동물이 먹이를 얻는 방식으로 가장 알맞은 것은?', choices: ['눈을 헤쳐 이끼·지의류를 먹는다', '나무 열매를 대량으로 저장한다', '물속 플랑크톤을 걸러 먹는다', '수액을 빨아 먹는다'], answer: 0, why: '툰드라의 대표 먹이는 이끼와 지의류이며, 눈 아래에서 찾아 먹습니다.' },
     { key: 'e3', q: '툰드라 환경에서 몸집이 큰 동물이 유리한 이유는?', choices: ['천적이 전혀 없어서', '부피 대비 표면적이 작아 열을 덜 잃어서', '먹이가 매우 풍부해서', '더위를 피하기 쉬워서'], answer: 1, why: '몸집이 클수록 표면적 비율이 낮아 체온 손실이 적습니다(베르그만 법칙).' },
   ] });
-  set('sketch', { image: PLACEHOLDER_SKETCH, strokes: new Array(40).fill([0, 0]) });
+  set('sketch', {
+    image: PLACEHOLDER_SKETCH, strokes: new Array(40).fill([0, 0]),
+    correct: 4, total: 5,
+    matchFeedback: '화석의 뿔·다리 구조가 그림에 잘 이어졌습니다. 등의 곡선이 조금 달라졌어요.',
+  });
+  _autoMatchFired.add('sketch');
   set('bio-name', { text: '눈털코뿔소' });
   set('bio-desc', { text:
     '몸길이 3.5m가 넘는 대형 초식동물로, 온몸이 촘촘한 겉털과 두꺼운 지방층으로 덮여 있어 영하 40도의 눈보라도 견딘다. '
@@ -1446,12 +1473,7 @@ async function seedState() {
     ability: '눈폭풍 저항', weakness: '해빙기의 더위',
   } });
   set('ai-image', { url: PLACEHOLDER_IMG });
-  set('sketch-vs-ai', {
-    checks: { silhouette: true, ratio: true, traits: true },
-    note: '실루엣은 잘 유지됐고 털 질감이 훨씬 사실적이 됐다.',
-    correct: 4, total: 5,
-    matchFeedback: '화석의 뿔·다리 구조가 그림에 잘 이어졌습니다. 등의 곡선이 조금 달라졌어요.',
-  });
+  set('sketch-vs-ai', { feedback: '털 색이 환경과 잘 어울리고 실루엣도 유지됐다. 뿔 끝이 조금 더 뾰족했으면.' });
 
   // 예시: 친구 카드 2개 획득 + 세션6 게이트 통과
   set('pv-dex', { owned: ['p3', 'p1'], quizzes: {} });

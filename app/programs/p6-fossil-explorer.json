@@ -100,7 +100,7 @@
             { "type": "compare", "id": "sketch-vs-ai", "label": "결과 확인 · 다시 생성",
               "left": { "label": "손그림", "ref": "sketch" }, "right": { "label": "AI 실사", "ref": "ai-image" } }
           ],
-          "advance": { "requires": ["ai-image", "sketch-vs-ai"] } }
+          "advance": { "requires": ["ai-image"] } }
       ]
     },
     {
@@ -124,7 +124,7 @@
                 { "ref": "card-info", "kind": "fields", "weight": 15 },
                 { "ref": "common-traits", "kind": "rows", "weight": 10 },
                 { "ref": "env-research", "kind": "quizscore", "weight": 12 },
-                { "ref": "sketch-vs-ai", "kind": "quizscore", "weight": 8 }
+                { "ref": "sketch", "kind": "quizscore", "weight": 8 }
               ] }
           ],
           "advance": { "requires": ["card-info", "card-collect"] } },
