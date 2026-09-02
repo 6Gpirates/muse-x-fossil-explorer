@@ -42,8 +42,8 @@
       "steps": [
         { "id": "s3-01", "phase": "research", "title": "환경과 생물 조사",
           "blocks": [
-            { "type": "text", "tone": "plain", "body": "믿을 수 있는 자료로 내가 뽑은 서식 환경을 조사하고, 그 환경에 사는 생물들의 공통 속성을 정리하세요." },
-            { "type": "input.long", "id": "env-research", "label": "이 서식 환경은 어떤 곳인가 (기후·지형·특징)", "min": 100 },
+            { "type": "text", "tone": "plain", "body": "믿을 수 있는 자료로 내가 뽑은 서식 환경을 조사하고, 그 환경에 사는 생물들의 공통 속성을 정리하세요. (환경 조사 글은 한글 200자 이상)" },
+            { "type": "input.long", "id": "env-research", "label": "이 서식 환경은 어떤 곳인가 (기후·지형·특징)", "min": 200 },
             { "type": "input.table", "id": "common-traits", "label": "이 환경 생물들의 공통 속성",
               "rows": [
                 { "key": "body", "label": "몸의 구조" }, { "key": "food", "label": "먹이·에너지" },

@@ -280,7 +280,8 @@ function envGrader(block) {
   const btn = h('button', { class: 'pv-btn-mock', type: 'button', text: 'AI 채점 받기' });
   btn.addEventListener('click', async () => {
     const text = ((get(block.id) || {}).text || '').trim();
-    if (text.length < 100) { status.textContent = '100자 이상 쓴 뒤 채점받으세요.'; return; }
+    const need = block.min || 200;
+    if (text.length < need) { status.textContent = `${need}자 이상 쓴 뒤 채점받으세요.`; return; }
     if (!aiConfig()) { status.textContent = 'AI 채점이 설정되지 않았습니다.'; return; }
     btn.disabled = true;
     status.textContent = '채점 중…';
@@ -1414,10 +1415,12 @@ async function seedState() {
   set('fossil-photo', { url: PLACEHOLDER_PHOTO, name: 'my-fossil.jpg' });
   set('env-research', {
     text:
-      '툰드라는 연중 대부분 땅이 얼어 있는 영구동토 지대다. 여름이 짧고 서늘하며 강수량이 적다. '
-      + '큰 나무가 자라지 못하고 이끼와 지의류, 키 작은 관목이 주로 자란다. 바람이 강하고 겨울이 매우 길다. '
-      + '동물은 두꺼운 지방과 털로 추위를 견디고, 눈 아래 먹이를 찾아 이동하며 산다.',
-    correct: 4, total: 5, feedback: '기후·지형·식생·동물 적응을 고르게 담았습니다. 계절 변화 서술이 조금 더 있으면 좋아요.',
+      '툰드라는 연중 대부분 땅속이 얼어 있는 영구동토 지대로, 북극권 주변과 높은 산의 정상부에 넓게 분포한다. '
+      + '여름은 두세 달로 매우 짧고 서늘하며, 겨울은 길고 영하 30~40도까지 내려간다. 강수량이 적어 사막처럼 건조하고 바람이 거세다. '
+      + '땅이 얼어 뿌리가 깊이 내리지 못해 큰 나무는 자라지 못하고, 이끼·지의류·사초·키 작은 관목이 지표를 덮는다. '
+      + '여름에는 표층만 녹아 물이 고여 습지와 연못이 곳곳에 생긴다. '
+      + '동물은 두꺼운 지방층과 촘촘한 털로 추위를 견디고, 몸집이 크고 귀·다리가 짧아 열 손실을 줄이며, 눈 아래의 먹이를 찾아 무리 지어 이동한다.',
+    correct: 4, total: 5, feedback: '기후·지형·식생·계절 변화·동물 적응을 고르게 담았습니다.',
   });
   set('common-traits', { rows: {
     body: '두꺼운 지방층과 촘촘한 겉털', food: '이끼·지의류·풀뿌리',
