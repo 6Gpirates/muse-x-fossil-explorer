@@ -6,9 +6,9 @@
    검토용이므로 라우팅·저장·인증은 없다. */
 
 // 블록 모듈은 캐시가 끈질겨 버전 쿼리를 붙인다. 블록 파일을 고치면 이 숫자를 올린다.
-import { drawHabitat } from './draw-habitat-block.js?b=3';
-import { datingSim } from './dating-sim-block.js?b=3';
-import { cardCollect } from './card-collect-block.js?b=3';
+import { drawHabitat } from './draw-habitat-block.js?b=4';
+import { datingSim } from './dating-sim-block.js?b=4';
+import { cardCollect } from './card-collect-block.js?b=4';
 import { get, set, _clear } from './state.js';
 import { loadFossilData } from './fossil-data.js';
 
@@ -431,6 +431,67 @@ async function generateAiJson(promptText, imageUrls) {
   return JSON.parse(out.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, ''));
 }
 
+const RASTER_RE = /^data:image\/(jpeg|jpg|png|webp);base64,/;
+
+/* ── 화석 ↔ 내 손그림 일치도 (AI, 카드 등급 요소) ─────────── */
+function fossilMatchBlock(block) {
+  const wrap = h('div', { class: 'pv-aiwrap pv-fossil-match' });
+  const status = h('p', { class: 'pv-upl-status' });
+  const st = get(block.id) || {};
+  const photo = (get('fossil-photo') || {}).url;
+  const sketch = (get('sketch') || {}).image;
+  const done = typeof st.correct === 'number';
+
+  wrap.append(h('p', { class: 'pv-block-label', text: '화석 ↔ 내 생물 일치도 (AI 판단)' }));
+
+  if (done) {
+    wrap.append(
+      h('p', { class: 'pv-quiz-score', text: `일치도 ${st.correct} / ${st.total}점` }),
+      st.matchFeedback ? h('p', { class: 'pv-prose', text: '평가 · ' + st.matchFeedback }) : null,
+      h('p', { class: 'pv-prose', text: '이 점수는 마지막 카드 등급에 반영됩니다.' }),
+    );
+    const redo = h('button', { class: 'pv-quiz-reveal-btn', type: 'button', text: '다시 평가' });
+    redo.addEventListener('click', () => { patch(block.id, { correct: undefined, total: undefined, matchFeedback: undefined }); render(); });
+    wrap.append(redo);
+    return wrap;
+  }
+
+  if (!(photo && RASTER_RE.test(photo)) || !(sketch && RASTER_RE.test(sketch))) {
+    wrap.append(h('p', { class: 'pv-prose', text: '세션 1의 화석 사진과 세션 4의 손그림(색칠 완성본)을 모두 올리면 AI가 두 그림이 형태적으로 얼마나 이어지는지 평가합니다.' }));
+    return wrap;
+  }
+
+  const btn = h('button', { class: 'pv-btn-mock', type: 'button', text: 'AI 일치도 평가' });
+  btn.addEventListener('click', async () => {
+    if (!aiConfig()) { status.textContent = 'AI가 설정되지 않았습니다.'; return; }
+    btn.disabled = true;
+    status.textContent = '평가 중…';
+    try {
+      const desc = (get('bio-desc') || {}).text || '';
+      const r = await generateAiJson(
+        '첫 번째 이미지는 학생이 고른 실제 화석 사진이고, 두 번째 이미지는 그 화석 생물이 다른 환경에 적응해 진화했다고 상상해 학생이 직접 그린 그림이다. '
+        + '두 번째 그림이 첫 번째 화석의 형태적 특징(전체 실루엣, 몸의 구조, 특징적인 부위)을 얼마나 이어받았는지 0~5점(정수)으로 평가하라. '
+        + '학생이 손으로 그린 러프한 스케치임을 충분히 감안해 관대하게, 하지만 완전히 무관하면 낮게. '
+        + `참고로 학생의 생물 설명: ${desc}\n`
+        + 'JSON만 출력: {"score": 정수, "feedback": "한국어 한 문장"}',
+        [photo, sketch],
+      );
+      const score = Math.max(0, Math.min(5, Math.round(Number(r.score) || 0)));
+      patch(block.id, { correct: score, total: 5, matchFeedback: String(r.feedback || '') });
+      updateProgress();
+      await render();
+    } catch (e) {
+      status.textContent = '평가 실패: ' + (e && e.message ? e.message : e);
+      btn.disabled = false;
+    }
+  });
+  wrap.append(
+    h('p', { class: 'pv-prose', text: '내가 고른 화석과 내가 그린 생물이 형태적으로 얼마나 이어지는지 AI가 봅니다. (러프한 손그림임을 감안해 평가)' }),
+    btn, status,
+  );
+  return wrap;
+}
+
 /* ── 극실사 프롬프트: 앞 단계 활동에서 자동 조립 ───────────
    교사 지정 템플릿 + 학생이 앞서 만든 설명/환경/연대를 채운다. */
 const REALISM_TEMPLATE =
@@ -774,33 +835,57 @@ function mockBlock(block) {
       return wrap;
 
     case 'compare': {
-      wrap.append(h('p', { class: 'pv-block-label' }, label || '손그림 ↔ AI 실사 비교'));
       const sk = get('sketch');
       const ai = get('ai-image');
       const fig = (cap, url) => h('figure', { class: 'pv-cmp-fig' },
         url ? h('img', { src: url, alt: cap }) : h('div', { class: 'pv-ph', text: cap + ' 없음' }),
         h('figcaption', { text: cap }));
+
+      // 손그림 ↔ AI 실사 비교 (그대로 유지)
+      wrap.append(h('p', { class: 'pv-block-label', text: '손그림 ↔ AI 실사 비교' }));
       wrap.append(h('div', { class: 'pv-compare' },
-        fig(block.left.label, sk && sk.image), fig(block.right.label, ai && ai.url)));
+        fig('내 손그림', sk && sk.image),
+        fig('AI 실사', ai && ai.url)));
 
+      // AI 이미지 피드백 + 피드백 반영해 다시 생성
       const cur = get(block.id) || {};
-      const checkWrap = h('div', { class: 'pv-checks' });
-      (block.checks || []).forEach((c) => {
-        const cb = h('input', { type: 'checkbox', checked: !!(cur.checks || {})[c.key] });
-        cb.addEventListener('change', () => {
-          const v = get(block.id) || {};
-          set(block.id, { ...v, checks: { ...(v.checks || {}), [c.key]: cb.checked } });
-        });
-        checkWrap.append(h('label', { class: 'pv-check' }, cb, h('span', { text: c.label })));
-      });
-      wrap.append(checkWrap);
+      wrap.append(h('p', { class: 'pv-block-label', text: 'AI가 만든 이미지에 대한 피드백' }));
+      wrap.append(h('p', { class: 'pv-prose', text: '아쉬운 점·보완했으면 하는 점을 적으세요. 이 내용을 반영해 다시 생성할 수 있습니다.' }));
+      const fb = h('textarea', { class: 'pv-field', rows: 3, placeholder: '예: 뿔이 너무 짧다 / 털 색이 환경과 안 어울린다 / 다리가 6개여야 한다' });
+      fb.value = cur.feedback || '';
+      fb.addEventListener('input', () => patch(block.id, { feedback: fb.value }));
+      wrap.append(fb);
 
-      if (block.note) {
-        const note = h('textarea', { class: 'pv-field', placeholder: block.note.hint, rows: 2 });
-        note.value = cur.note || '';
-        note.addEventListener('input', () => patch(block.id, { note: note.value }));
-        wrap.append(h('p', { class: 'pv-block-label' }, block.note.label), note);
+      if (aiConfig()) {
+        const status = h('p', { class: 'pv-upl-status' });
+        const regen = h('button', { class: 'pv-btn-mock', type: 'button', text: '피드백 반영해 다시 생성' });
+        regen.addEventListener('click', async () => {
+          regen.disabled = true;
+          status.textContent = '다시 생성 중입니다… (10~20초)';
+          try {
+            const feedback = ((get(block.id) || {}).feedback || '').trim();
+            const prompt = buildRealismPrompt() + (feedback ? `\n\n[학생 피드백 — 아래 지적을 반영해 개선]\n${feedback}` : '');
+            const before = get('ai-image');
+            const url = await generateAiImage(prompt, sk && sk.image);
+            set('ai-image', { url, source: 'gemini' });
+            if (!(get('ai-image') || {}).url) {
+              set('ai-image', before);
+              status.textContent = '저장 공간이 꽉 찼습니다.';
+              regen.disabled = false;
+              return;
+            }
+            await render();
+          } catch (e) {
+            status.textContent = '다시 생성 실패: ' + (e && e.message ? e.message : e);
+            regen.disabled = false;
+          }
+        });
+        wrap.append(regen, status);
+        wrap.append(h('p', { class: 'pv-caution', text: '다시 생성할 때마다 이미지가 새로 만들어지며 비용이 발생합니다.' }));
       }
+
+      // 화석 ↔ 손그림 일치도 (AI 판단, 카드 등급 요소)
+      wrap.append(fossilMatchBlock(block));
       return wrap;
     }
 
@@ -825,6 +910,12 @@ async function realBlock(block) {
   const handler = CUSTOM[block.type];
   const wrap = h('div', { class: 'pv-block pv-real-wrap' });
   wrap.append(h('p', { class: 'pv-block-label' }, block.label || block.type));
+  // 내 카드는 퀴즈 게이트 없이 — 카드 만들기(aiMade)가 끝나면 바로 개봉해 결과를 보여준다.
+  if (block.type === 'card.collect'
+    && (get('card-info') || {}).aiMade
+    && !(get(block.id) || {}).openedAt) {
+    try { await handler._open(block, ctx); } catch { /* 개봉 실패는 무시 */ }
+  }
   try {
     const node = await handler.render(block, ctx);
     wrap.append(node);
@@ -1164,6 +1255,8 @@ function blockDone(id) {
       if (id === 'final-quiz') return (dexState().owned || []).length >= 1;
       return typeof (v || {}).correct === 'number';
     case 'ai.collect': return !!(get('ai-image') || {}).url;
+    case 'compare':
+      return typeof (v || {}).correct === 'number'; // 화석 일치도 평가 완료
     default: return true;
   }
 }
@@ -1350,7 +1443,12 @@ async function seedState() {
     ability: '눈폭풍 저항', weakness: '해빙기의 더위',
   } });
   set('ai-image', { url: PLACEHOLDER_IMG });
-  set('sketch-vs-ai', { checks: { silhouette: true, ratio: true, traits: true }, note: '실루엣은 잘 유지됐고 털 질감이 훨씬 사실적이 됐다.' });
+  set('sketch-vs-ai', {
+    checks: { silhouette: true, ratio: true, traits: true },
+    note: '실루엣은 잘 유지됐고 털 질감이 훨씬 사실적이 됐다.',
+    correct: 4, total: 5,
+    matchFeedback: '화석의 뿔·다리 구조가 그림에 잘 이어졌습니다. 등의 곡선이 조금 달라졌어요.',
+  });
 
   // 예시: 친구 카드 2개 획득 + 세션6 게이트 통과
   set('pv-dex', { owned: ['p3', 'p1'], quizzes: {} });

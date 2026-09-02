@@ -97,53 +97,44 @@
         { "id": "s5-02", "phase": "ai", "title": "결과 이미지",
           "blocks": [
             { "type": "ai.collect", "id": "ai-image", "label": "완성 이미지 업로드", "accept": ["file", "url"], "promptRef": "realism-prompt" },
-            { "type": "compare", "id": "sketch-vs-ai", "label": "손그림 ↔ 실사 비교",
-              "left": { "label": "손그림", "ref": "sketch" }, "right": { "label": "AI 실사", "ref": "ai-image" },
-              "checks": [
-                { "key": "silhouette", "label": "실루엣이 유지됐나" },
-                { "key": "ratio", "label": "신체 비율이 맞나" },
-                { "key": "traits", "label": "적응 특징이 반영됐나" }
-              ],
-              "note": { "label": "느낀 점", "hint": "무엇이 잘/덜 반영됐는지" } }
+            { "type": "compare", "id": "sketch-vs-ai", "label": "결과 확인 · 다시 생성",
+              "left": { "label": "손그림", "ref": "sketch" }, "right": { "label": "AI 실사", "ref": "ai-image" } }
           ],
-          "advance": { "requires": ["ai-image"] } },
-        { "id": "s5-03", "phase": "ai", "title": "카드 만들기",
+          "advance": { "requires": ["ai-image", "sketch-vs-ai"] } }
+      ]
+    },
+    {
+      "id": "s6", "no": 6, "title": "카드를 완성하고 나누다", "tagline": "내 카드 완성 + 친구 카드 모으기",
+      "steps": [
+        { "id": "s6-01", "phase": "collect", "title": "내 카드 만들기",
           "blocks": [
-            { "type": "text", "tone": "plain", "body": "완성된 그림과 AI 이미지를 바탕으로 카드 정보를 만듭니다. 이름과 서식지는 앞에서 정한 대로 들어가고, 타입·특수 능력·약점은 AI가 그림을 보고 정해 줍니다." },
+            { "type": "text", "tone": "plain", "body": "완성된 그림과 AI 이미지를 바탕으로 카드를 완성합니다. 이름과 서식지는 앞에서 정한 대로 들어가고, 타입·특수 능력·약점은 AI가 그림을 보고 정해 줍니다. 만들면 카드 결과가 바로 나옵니다." },
             { "type": "input.table", "id": "card-info", "label": "카드에 넣을 정보",
               "rows": [
                 { "key": "name", "label": "이름" }, { "key": "type", "label": "타입" },
                 { "key": "habitat", "label": "서식지" }, { "key": "ability", "label": "특수 능력" },
                 { "key": "weakness", "label": "약점" }
-              ] }
-          ],
-          "advance": { "requires": ["card-info"] } }
-      ]
-    },
-    {
-      "id": "s6", "no": 6, "title": "카드를 획득하다", "tagline": "퀴즈 통과 → 카드 개봉",
-      "steps": [
-        { "id": "s6-01", "phase": "quiz", "title": "종합 퀴즈",
-          "blocks": [
-            { "type": "text", "tone": "plain", "body": "퀴즈를 통과하면 나만의 생물 카드를 개봉합니다." },
-            { "type": "quiz", "id": "final-quiz", "label": "생물·환경·지질시대 종합 퀴즈", "questions": [{"key":"f1","q":"화석만으로는 알기 어려운 정보는?","choices":["뼈의 크기와 형태","이빨 모양","피부색과 울음소리","골격의 연결 구조"],"answer":2,"why":"연조직·색·소리는 대개 화석에 남지 않아 추정만 가능합니다."},{"key":"f2","q":"지질 시대를 오래된 것부터 순서대로 놓으면?","choices":["선캄브리아 시대 – 고생대 – 중생대 – 신생대","고생대 – 선캄브리아 시대 – 중생대 – 신생대","신생대 – 중생대 – 고생대 – 선캄브리아 시대","중생대 – 고생대 – 신생대 – 선캄브리아 시대"],"answer":0,"why":"선캄브리아 → 고생대 → 중생대 → 신생대 순입니다."},{"key":"f3","q":"방사성 동위원소로 암석의 나이를 재는 원리는?","choices":["모원소가 일정한 비율로 자원소로 붕괴하는 시간(반감기)을 이용","화석의 개수를 센다","지층의 색을 비교한다","암석의 무게를 잰다"],"answer":0,"why":"반감기가 일정하므로 모원소:자원소 비로 경과 시간을 계산합니다."},{"key":"f4","q":"모원소와 자원소의 비가 1:3이면 반감기가 몇 번 지났나?","choices":["1번","2번","3번","4번"],"answer":1,"why":"1:3은 모원소가 1/4(25%) 남은 것 → 반감기 2회 경과입니다."},{"key":"f5","q":"어떤 생물이 특정 환경에 '적응했다'는 말의 뜻으로 가장 알맞은 것은?","choices":["생존·번식에 유리한 형질이 여러 세대에 걸쳐 늘어났다","한 개체가 살면서 몸을 바꿨다","환경이 생물에 맞게 변했다","우연히 그렇게 생겼다"],"answer":0,"why":"적응은 자연선택으로 유리한 형질의 빈도가 높아지는 집단 수준의 변화입니다."}] }
-          ],
-          "advance": { "requires": ["final-quiz"] } },
-        { "id": "s6-02", "phase": "collect", "title": "카드 개봉",
-          "blocks": [
-            { "type": "card.collect", "id": "card-collect", "label": "생물 카드 개봉",
+              ] },
+            { "type": "card.collect", "id": "card-collect", "label": "내 생물 카드",
               "imageRef": "ai-image", "infoRef": "card-info", "quizRef": "final-quiz", "rarityRef": "rarity",
               "quizCount": 5,
               "signals": [
-                { "ref": "sketch", "kind": "strokes", "weight": 15, "full": 36 },
-                { "ref": "bio-desc", "kind": "textlen", "weight": 15, "full": 300 },
+                { "ref": "sketch", "kind": "strokes", "weight": 12, "full": 36 },
+                { "ref": "bio-desc", "kind": "textlen", "weight": 13, "full": 300 },
                 { "ref": "card-info", "kind": "fields", "weight": 15 },
                 { "ref": "common-traits", "kind": "rows", "weight": 10 },
-                { "ref": "env-research", "kind": "quizscore", "weight": 15 }
-              ] },
+                { "ref": "env-research", "kind": "quizscore", "weight": 12 },
+                { "ref": "sketch-vs-ai", "kind": "quizscore", "weight": 8 }
+              ] }
+          ],
+          "advance": { "requires": ["card-info", "card-collect"] } },
+        { "id": "s6-02", "phase": "quiz", "title": "친구 카드 도감",
+          "blocks": [
+            { "type": "text", "tone": "plain", "body": "친구들이 만든 카드를 살펴보고, 각 카드에 대한 과학 퀴즈에서 3개 이상 맞히면 그 카드를 내 도감북에 넣을 수 있습니다." },
+            { "type": "quiz", "id": "final-quiz", "label": "친구 카드 도감", "questions": [{"key":"f1","q":"자리표시자","choices":["a","b","c","d"],"answer":0,"why":"공유의 장에서 카드별로 생성됩니다."}] },
             { "type": "submit", "id": "final-submit", "label": "최종 제출" }
           ],
-          "advance": { "requires": ["final-quiz", "card-collect"] } }
+          "advance": { "requires": [] } }
       ]
     }
   ],

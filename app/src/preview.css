@@ -268,7 +268,7 @@ textarea.pv-field { resize: vertical; min-height: 70px; }
 
 /* 이미지 업로드 */
 .pv-upl { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
-.pv-upl-img {
+.pv-screen img.pv-upl-img {
   max-width: 320px; width: 100%; border-radius: 12px; border: 1px solid var(--pv-line);
   display: block; object-fit: contain; background: #fbfaf6;
 }
@@ -344,6 +344,8 @@ textarea.pv-field { resize: vertical; min-height: 70px; }
 }
 
 .pv-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pv-compare.pv-compare-3 { grid-template-columns: repeat(3, 1fr); }
+.pv-fossil-match { border-top: 1px dashed var(--pv-line); padding-top: 12px; }
 .pv-compare .pv-cmp-fig {
   margin: 0; border: 1px solid var(--pv-line); border-radius: 10px; overflow: hidden; background: #fcfbf8;
 }
@@ -374,6 +376,6 @@ textarea.pv-field { resize: vertical; min-height: 70px; }
 
 @media (max-width: 560px) {
   .pv-hero h1 { font-size: 1.4rem; }
-  .pv-compare { grid-template-columns: 1fr; }
+  .pv-compare, .pv-compare.pv-compare-3 { grid-template-columns: 1fr; }
   .pv-table th { width: 40%; }
 }
