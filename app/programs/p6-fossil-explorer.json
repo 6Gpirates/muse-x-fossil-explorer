@@ -73,8 +73,8 @@
           "advance": { "requires": ["sketch", "bio-name"] } },
         { "id": "s4-02", "phase": "create", "title": "생물 설명",
           "blocks": [
-            { "type": "text", "tone": "plain", "body": "이 생물을 자세히 설명하세요. 아래 다섯 가지가 모두 드러나게 씁니다.\n· 몸의 구조 (크기·형태·특징)\n· 먹이와 에너지를 얻는 방법\n· 이동 방법\n· 체온·수분을 유지하는 방법\n· 번식·생존 전략\n(한글 100자 이상 써야 다음으로 넘어갈 수 있습니다.)" },
-            { "type": "input.long", "id": "bio-desc", "label": "생물 상세 설명", "min": 100 }
+            { "type": "text", "tone": "plain", "body": "이 생물을 자세히 설명하세요. 아래 다섯 가지가 모두 드러나게 씁니다.\n· 몸의 구조 (크기·형태·특징)\n· 먹이와 에너지를 얻는 방법\n· 이동 방법\n· 체온·수분을 유지하는 방법\n· 번식·생존 전략\n(한글 200자 이상 써야 다음으로 넘어갈 수 있습니다.)" },
+            { "type": "input.long", "id": "bio-desc", "label": "생물 상세 설명", "min": 200 }
           ],
           "advance": { "requires": ["bio-desc"] } }
       ]
