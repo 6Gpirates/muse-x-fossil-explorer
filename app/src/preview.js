@@ -5,9 +5,10 @@
    - 플랫폼 담당 블록(사진·글·표·퀴즈·AI)은 "이렇게 생겼다"가 보이는 시안용 목업.
    검토용이므로 라우팅·저장·인증은 없다. */
 
-import { drawHabitat } from './draw-habitat-block.js';
-import { datingSim } from './dating-sim-block.js';
-import { cardCollect } from './card-collect-block.js';
+// 블록 모듈은 캐시가 끈질겨 버전 쿼리를 붙인다. 블록 파일을 고치면 이 숫자를 올린다.
+import { drawHabitat } from './draw-habitat-block.js?b=3';
+import { datingSim } from './dating-sim-block.js?b=3';
+import { cardCollect } from './card-collect-block.js?b=3';
 import { get, set, _clear } from './state.js';
 import { loadFossilData } from './fossil-data.js';
 
@@ -301,7 +302,7 @@ function envGrader(block) {
     }
   });
   wrap.append(
-    h('p', { class: 'pv-prose', text: 'AI가 조사 글을 채점합니다. 이 점수는 마지막 카드 등급에 반영됩니다. (텍스트 채점, 비용 매우 적음)' }),
+    h('p', { class: 'pv-prose', text: 'AI가 조사 글을 채점합니다. 이 점수는 마지막 카드 등급에 반영됩니다.' }),
     btn, status,
   );
   return wrap;
@@ -344,7 +345,7 @@ function cardInfoPolish(block) {
     }
   });
   wrap.append(
-    h('p', { class: 'pv-prose', text: '학생이 막 쓴 표현을 카드용으로 다듬고, 빈칸은 AI가 채웁니다. (텍스트, 비용 매우 적음)' }),
+    h('p', { class: 'pv-prose', text: '학생이 막 쓴 표현을 카드용으로 다듬고, 빈칸은 AI가 채웁니다.' }),
     btn, status,
   );
   if ((get(block.id) || {}).polished) wrap.append(h('p', { class: 'pv-upl-status', text: '✓ AI가 다듬은 상태입니다. 표에서 직접 더 고칠 수 있습니다.' }));
@@ -1238,7 +1239,6 @@ async function seedState() {
   });
 
   set('fossil-photo', { url: PLACEHOLDER_PHOTO, name: 'my-fossil.jpg' });
-  set('fossil-note', { text: '자연사관 2층 화석 전시실에서 봤다. 돌 속에 조개껍데기가 그대로 박혀 있어 신기했다.' });
   set('env-research', {
     text:
       '툰드라는 연중 대부분 땅이 얼어 있는 영구동토 지대다. 여름이 짧고 서늘하며 강수량이 적다. '

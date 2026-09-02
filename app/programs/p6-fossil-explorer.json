@@ -16,14 +16,13 @@
         { "id": "s1-01", "phase": "collect", "title": "내 화석 사진",
           "blocks": [
             { "type": "text", "tone": "plain", "body": "국립중앙과학관을 돌아보며 마음에 드는 화석을 사진으로 찍어 올리세요." },
-            { "type": "capture.photo", "id": "fossil-photo", "label": "내 화석", "groups": [{ "key": "fossil", "label": "내 화석", "min": 1 }] },
-            { "type": "input.short", "id": "fossil-note", "label": "이 화석을 어디서 봤나요? 첫인상은?" }
+            { "type": "capture.photo", "id": "fossil-photo", "label": "내 화석", "groups": [{ "key": "fossil", "label": "내 화석", "min": 1 }] }
           ],
           "advance": { "requires": ["fossil-photo"] } }
       ]
     },
     {
-      "id": "s2", "no": 2, "title": "환경과 연대를 뽑다", "tagline": "무작위 환경 + 방사성 연대 측정",
+      "id": "s2", "no": 2, "title": "이 화석이 만들어진 연대와 살았던 환경은?", "tagline": "무작위 환경 배정 + 방사성 연대 측정",
       "steps": [
         { "id": "s2-01", "phase": "draw", "title": "서식 환경 뽑기",
           "blocks": [
@@ -62,7 +61,7 @@
       ]
     },
     {
-      "id": "s4", "no": 4, "title": "생물을 상상해 그리다", "tagline": "공통 속성을 반영한 그림",
+      "id": "s4", "no": 4, "title": "상상의 동물을 그리다", "tagline": "공통 속성을 반영한 그림",
       "steps": [
         { "id": "s4-01", "phase": "create", "title": "생물 그리기",
           "blocks": [

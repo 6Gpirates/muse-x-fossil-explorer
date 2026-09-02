@@ -44,31 +44,70 @@
 .fx-habitat-eng { font-size: .85rem; opacity: .7; }
 .fx-habitat-desc { margin: 10px 0 0; font-size: .9rem; line-height: 1.5; opacity: .92; }
 
-/* ── 방사성 연대 측정 그리드 ──────────────────────────────── */
+/* ── 방사성 연대 측정 ────────────────────────────────────── */
+.fx-dating-sim { text-align: center; }
+
+.fx-iso-panel {
+  max-width: 300px; margin: 4px auto 18px;
+  padding: 14px; border-radius: 14px;
+  background: rgba(148, 163, 184, .1); border: 1px solid rgba(148, 163, 184, .35);
+}
+.fx-iso-title {
+  margin: 0 0 10px; font-size: .78rem; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase; opacity: .65;
+}
 .fx-atom-grid {
-  display: grid; grid-template-columns: repeat(6,1fr); gap: 6px;
-  max-width: 260px; margin: 8px 0;
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px;
+  max-width: 210px; margin: 0 auto;
 }
 .fx-atom { aspect-ratio: 1; border-radius: 50%; }
 .fx-atom-parent   { background: radial-gradient(circle at 35% 35%, #a5f3fc, #0891b2); }
 .fx-atom-daughter { background: radial-gradient(circle at 35% 35%, #e9d5ff, #7e22ce); }
-.fx-atom-legend { font-size: .85rem; margin-bottom: 4px; opacity: .85; }
+
+.fx-iso-legend { display: grid; gap: 10px; margin-top: 14px; text-align: left; }
+.fx-iso-row { display: flex; gap: 10px; align-items: flex-start; }
+.fx-iso-swatch {
+  width: 18px; height: 18px; border-radius: 50%; flex: none; margin-top: 2px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.08);
+}
+.fx-iso-text { line-height: 1.4; }
+.fx-iso-count { font-weight: 800; }
+.fx-iso-desc { font-size: .8rem; opacity: .72; }
 
 .fx-halflife-table {
-  border-collapse: collapse; font-size: .85rem; margin: 10px 0;
+  border-collapse: collapse; font-size: .85rem; margin: 12px auto;
 }
-.fx-halflife-table caption { text-align: left; font-weight: 700; padding-bottom: 4px; }
-.fx-halflife-table td {
-  border: 1px solid #94a3b8; padding: 4px 10px;
-}
+.fx-halflife-table caption { text-align: center; font-weight: 700; padding-bottom: 6px; opacity: .8; }
+.fx-halflife-table td { border: 1px solid #94a3b8; padding: 5px 12px; }
+.fx-halflife-table td:first-child { text-align: left; }
+.fx-halflife-table td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 
-.fx-sim-element { margin: 12px 0 6px; font-size: 1rem; }
-.fx-sim-input {
-  padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 8px;
-  font: inherit; margin-right: 8px;
+.fx-sim-element { margin: 14px 0 4px; font-size: 1rem; font-weight: 700; }
+
+.fx-sim-form {
+  display: flex; flex-direction: column; gap: 10px; align-items: center;
+  max-width: 340px; margin: 12px auto 0;
 }
+.fx-sim-inputlabel { font-size: .86rem; font-weight: 600; }
+.fx-sim-field {
+  display: flex; width: 100%;
+  border: 1px solid #94a3b8; border-radius: 10px; overflow: hidden; background: #fff;
+}
+.fx-sim-field:focus-within { border-color: #4f46e5; box-shadow: 0 0 0 2px rgba(79,70,229,.2); }
+.fx-sim-input {
+  flex: 1; min-width: 0; border: 0; padding: 11px 12px;
+  font: inherit; font-size: 1rem; text-align: right; background: transparent;
+}
+.fx-sim-input:focus { outline: none; }
+.fx-sim-unit {
+  display: flex; align-items: center; padding: 0 14px;
+  background: #eef2f7; font-weight: 800; color: #475569; white-space: nowrap;
+}
+.fx-sim-submit { width: 100%; }
+
 .fx-sim-result {
-  margin-top: 12px; padding: 12px 14px; border-radius: 12px;
+  margin: 14px auto 0; max-width: 420px; text-align: left;
+  padding: 12px 14px; border-radius: 12px;
   background: #0f172a; color: #f1f5f9; border-left: 5px solid #64748b;
 }
 .fx-sim-result.is-correct { border-left-color: #22c55e; }

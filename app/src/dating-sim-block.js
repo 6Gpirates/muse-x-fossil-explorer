@@ -18,22 +18,56 @@ async function resolveProblems(block) {
   return data[block.problemsRef || 'datingProblems'];
 }
 
+function isoRow(kind, name, desc, count) {
+  const row = document.createElement('div');
+  row.className = 'fx-iso-row';
+  const sw = document.createElement('span');
+  sw.className = 'fx-iso-swatch fx-atom-' + kind;
+  const txt = document.createElement('div');
+  txt.className = 'fx-iso-text';
+  const head = document.createElement('div');
+  const b = document.createElement('b');
+  b.textContent = name;
+  const cnt = document.createElement('span');
+  cnt.className = 'fx-iso-count';
+  cnt.textContent = ' ' + count + '개';
+  head.append(b, cnt);
+  const d = document.createElement('div');
+  d.className = 'fx-iso-desc';
+  d.textContent = desc;
+  txt.append(head, d);
+  row.append(sw, txt);
+  return row;
+}
+
 function particleGrid(parentPercent) {
   const total = 36;
   const parentCount = Math.round((parentPercent / 100) * total);
-  const wrap = document.createElement('div');
-  wrap.className = 'fx-atom-grid';
+
+  const panel = document.createElement('div');
+  panel.className = 'fx-iso-panel';
+
+  const title = document.createElement('p');
+  title.className = 'fx-iso-title';
+  title.textContent = '화석 속 원소 비율';
+  panel.appendChild(title);
+
+  const grid = document.createElement('div');
+  grid.className = 'fx-atom-grid';
   for (let i = 0; i < total; i++) {
     const a = document.createElement('div');
     a.className = 'fx-atom ' + (i < parentCount ? 'fx-atom-parent' : 'fx-atom-daughter');
-    wrap.appendChild(a);
+    grid.appendChild(a);
   }
-  const label = document.createElement('div');
-  label.className = 'fx-atom-legend';
-  label.textContent = `모원소 ${parentCount}개 · 자원소 ${total - parentCount}개`;
-  const box = document.createElement('div');
-  box.append(label, wrap);
-  return box;
+  panel.appendChild(grid);
+
+  const legend = document.createElement('div');
+  legend.className = 'fx-iso-legend';
+  legend.appendChild(isoRow('parent', '모원소', '아직 붕괴하지 않고 남아 있는 원래 원소', parentCount));
+  legend.appendChild(isoRow('daughter', '자원소', '모원소가 붕괴하며 새로 생겨난 원소', total - parentCount));
+  panel.appendChild(legend);
+
+  return panel;
 }
 
 function refTable(rows) {
@@ -110,16 +144,31 @@ export const datingSim = {
       return root;
     }
 
+    const form = document.createElement('div');
+    form.className = 'fx-sim-form';
+
+    const label = document.createElement('label');
+    label.className = 'fx-sim-inputlabel';
+    label.textContent = `측정한 연대를 "${p.unit}" 단위의 숫자로 입력하세요`;
+
+    const field = document.createElement('div');
+    field.className = 'fx-sim-field';
     const input = document.createElement('input');
     input.type = 'text';
+    input.inputMode = 'numeric';
     input.className = 'fx-sim-input';
-    input.placeholder = `숫자만 입력 (단위: ${p.unit})`;
+    input.placeholder = '숫자만';
+    input.setAttribute('aria-label', `측정 연대 (${p.unit})`);
+    const unitTag = document.createElement('span');
+    unitTag.className = 'fx-sim-unit';
+    unitTag.textContent = p.unit;
+    field.append(input, unitTag);
 
     const submit = document.createElement('button');
     submit.type = 'button';
-    submit.className = 'fx-btn';
+    submit.className = 'fx-btn fx-sim-submit';
     submit.textContent = '측정 결과 제출';
-    submit.addEventListener('click', () => {
+    const doSubmit = () => {
       const raw = input.value.trim();
       if (!raw) { input.focus(); return; }
       const correct = gradeAnswer(raw, p.correctAnswer);
@@ -128,9 +177,12 @@ export const datingSim = {
       ctx.refreshFooter();
       root.innerHTML = '';
       root.appendChild(resultView(p, updatedValue));
-    });
+    };
+    submit.addEventListener('click', doSubmit);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSubmit(); });
 
-    root.append(input, submit);
+    form.append(label, field, submit);
+    root.append(form);
     return root;
   },
 
