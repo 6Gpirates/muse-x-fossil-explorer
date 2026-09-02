@@ -237,6 +237,12 @@ body {
 .pv-screen img { max-width: 100%; height: auto; }
 
 .pv-aiwrap { margin-top: 10px; }
+.pv-type-chip {
+  display: inline-block; font-size: .8rem; font-weight: 700;
+  background: var(--pv-teal-soft); color: var(--pv-teal);
+  border: 1px solid #bfe0d9; border-radius: 99px;
+  padding: 2px 10px; margin: 0 6px 4px 0;
+}
 .pv-caution {
   font-size: .8rem; color: #92400e; background: #fef3c7;
   border: 1px solid #fde68a; border-radius: 8px; padding: 8px 12px; margin: 8px 0 0;

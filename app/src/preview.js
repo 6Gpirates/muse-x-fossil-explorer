@@ -308,35 +308,87 @@ function envGrader(block) {
   return wrap;
 }
 
-/* ── 카드 정보 AI 다듬기 ────────────────────────────────── */
-function cardInfoPolish(block) {
-  const wrap = h('div', { class: 'pv-aiwrap' });
+/* ── 카드 만들기 (이름·서식지 자동 / 타입·능력·약점 AI 판단) ── */
+const CARD_TYPES = ['물', '불', '땅', '하늘', '자연', '전기', '드래곤', '독', '빛', '어둠', '바다', '얼음'];
+
+function cardMakeBlock(block) {
+  const wrap = h('div', null);
   const status = h('p', { class: 'pv-upl-status' });
-  const btn = h('button', { class: 'pv-btn-mock', type: 'button', text: 'AI로 표현 다듬기 · 빈칸 채우기' });
+  const name = (get('bio-name') || {}).text || '(이름 미정)';
+  const habitat = myHabitatName() || '(서식지 미정)';
+  const st = get(block.id) || {};
+  const rows = st.rows || {};
+
+  // 자동 항목
+  const auto = h('table', { class: 'pv-table' });
+  auto.append(
+    h('tr', null, h('th', { text: '이름' }), h('td', { text: name })),
+    h('tr', null, h('th', { text: '서식지' }), h('td', { text: habitat })),
+  );
+  wrap.append(h('p', { class: 'pv-block-label', text: '자동으로 들어가는 정보' }), auto);
+
+  wrap.append(h('p', { class: 'pv-block-label', text: 'AI가 정하는 정보 (그림·이미지·설명을 보고 판단)' }));
+
+  if (st.aiMade) {
+    const t = h('table', { class: 'pv-table' });
+    const typeCell = h('td', null);
+    (Array.isArray(rows.typeList) ? rows.typeList : (rows.type || '').split(/[·,/]/).map((s) => s.trim()).filter(Boolean))
+      .forEach((tp) => typeCell.append(h('span', { class: 'pv-type-chip', text: tp })));
+    t.append(
+      h('tr', null, h('th', { text: '타입' }), typeCell),
+      h('tr', null, h('th', { text: '특수 능력' }), h('td', { text: rows.ability || '-' })),
+      h('tr', null, h('th', { text: '약점' }), h('td', { text: rows.weakness || '-' })),
+    );
+    wrap.append(t);
+    const redo = h('button', { class: 'pv-quiz-reveal-btn', type: 'button', text: '다시 만들기' });
+    redo.addEventListener('click', () => { patch(block.id, { aiMade: false }); render(); });
+    wrap.append(redo);
+    return wrap;
+  }
+
+  const btn = h('button', { class: 'pv-btn-mock', type: 'button', text: 'AI로 카드 만들기' });
   btn.addEventListener('click', async () => {
     if (!aiConfig()) { status.textContent = 'AI가 설정되지 않았습니다.'; return; }
     btn.disabled = true;
-    status.textContent = '다듬는 중…';
+    status.textContent = '카드 만드는 중…';
     try {
-      const rows = (get(block.id) || {}).rows || {};
-      const desc = (get('bio-desc') || {}).text || (get('bio-name') || {}).text || '';
-      const r = await generateText(
-        '학생이 만든 가상 생물 카드 정보를 게임 카드에 어울리는 정제된 한국어 표현으로 다듬어라. '
-        + '내용·의미는 유지하고 표현만 매끄럽게. 비어 있는 항목은 아래 생물 설명을 참고해 새로 지어라. '
-        + '각 항목은 12자 이내로 짧게.\n'
-        + `JSON만 출력: {"name":"","type":"","habitat":"","ability":"","weakness":""}\n\n`
-        + `생물 설명: ${desc}\n`
-        + `현재 값: 이름=${rows.name || ''} / 타입=${rows.type || ''} / 서식지=${rows.habitat || ''} / 특수능력=${rows.ability || ''} / 약점=${rows.weakness || ''}`,
-        true,
-      );
+      const desc = (get('bio-desc') || {}).text || '';
+      const traits = Object.values((get('common-traits') || {}).rows || {}).filter(Boolean).join(', ');
+      const img = (get('ai-image') || {}).url;
+      const sketch = (get('sketch') || {}).image;
+      const parts = [];
+      if (img && /^data:image\/(jpeg|png|webp);base64,/.test(img)) {
+        parts.push({ label: 'AI 극실사 이미지', url: img });
+      } else if (sketch && /^data:image\/(jpeg|png|webp);base64,/.test(sketch)) {
+        parts.push({ label: '손그림', url: sketch });
+      }
+      const prompt =
+        '학생이 만든 가상 생물의 그림/이미지와 정보를 보고 게임 카드 정보를 정해라.\n'
+        + `- 타입: 다음 12개 중에서만 정확히 2개 고른다 → ${CARD_TYPES.join(', ')}\n`
+        + '- 특수 능력: 카드 게임풍으로 12자 이내\n'
+        + '- 약점: 12자 이내\n'
+        + `생물 이름: ${name}\n서식지: ${habitat}\n설명: ${desc}\n공통 속성: ${traits}\n`
+        + 'JSON만 출력: {"types":["",""],"ability":"","weakness":""}';
+      const r = await generateAiJson(prompt, parts.map((p) => p.url));
+      let types = (Array.isArray(r.types) ? r.types : []).map(String)
+        .map((s) => s.trim())
+        .filter((s) => CARD_TYPES.includes(s));
+      if (types.length < 2) {
+        // 목록에 없는 값이 오면 가장 근접하게 보정: 부족분은 자연/땅으로 채움
+        for (const fallback of ['자연', '땅', '물']) {
+          if (types.length >= 2) break;
+          if (!types.includes(fallback)) types.push(fallback);
+        }
+      }
+      types = types.slice(0, 2);
       const next = {
-        name: r.name || rows.name || '',
-        type: r.type || rows.type || '',
-        habitat: r.habitat || rows.habitat || '',
-        ability: r.ability || rows.ability || '',
-        weakness: r.weakness || rows.weakness || '',
+        name, habitat,
+        typeList: types,
+        type: types.join(' · '),
+        ability: String(r.ability || '').slice(0, 20) || '적응 특화',
+        weakness: String(r.weakness || '').slice(0, 20) || '환경 급변',
       };
-      patch(block.id, { rows: next, polished: true });
+      patch(block.id, { rows: next, aiMade: true });
       updateProgress();
       await render();
     } catch (e) {
@@ -345,11 +397,38 @@ function cardInfoPolish(block) {
     }
   });
   wrap.append(
-    h('p', { class: 'pv-prose', text: '학생이 막 쓴 표현을 카드용으로 다듬고, 빈칸은 AI가 채웁니다.' }),
+    h('p', { class: 'pv-prose', text: '타입 2개 · 특수 능력 · 약점을 AI가 그림과 지금까지의 정보로 정합니다.' }),
     btn, status,
   );
-  if ((get(block.id) || {}).polished) wrap.append(h('p', { class: 'pv-upl-status', text: '✓ AI가 다듬은 상태입니다. 표에서 직접 더 고칠 수 있습니다.' }));
   return wrap;
+}
+
+// 이미지(옵션) + 텍스트 → JSON 응답
+async function generateAiJson(promptText, imageUrls) {
+  const cfg = aiConfig();
+  if (!cfg) throw new Error('AI 키가 설정되지 않았습니다');
+  const model = cfg.textModel || 'gemini-2.5-flash';
+  const parts = [{ text: promptText }];
+  for (const u of (imageUrls || [])) {
+    if (u && /^data:image\/(jpeg|png|webp);base64,/.test(u)) {
+      const [head, b64] = u.split(',');
+      parts.push({ inlineData: { mimeType: (head.match(/data:([^;]+)/) || [])[1], data: b64 } });
+    }
+  }
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(cfg.geminiKey)}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: 'application/json' } }),
+  });
+  if (!res.ok) {
+    let msg = res.status + '';
+    try { const j = await res.json(); msg = (j.error && j.error.message) || msg; } catch { /* noop */ }
+    throw new Error(msg);
+  }
+  const data = await res.json();
+  const out = ((((data.candidates || [])[0] || {}).content || {}).parts || []).map((p) => p.text || '').join('').trim();
+  return JSON.parse(out.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, ''));
 }
 
 /* ── 극실사 프롬프트: 앞 단계 활동에서 자동 조립 ───────────
@@ -496,8 +575,8 @@ function mockBlock(block) {
       return wrap;
 
     case 'input.table':
+      if (block.id === 'card-info') { wrap.append(cardMakeBlock(block)); return wrap; }
       wrap.append(h('p', { class: 'pv-block-label' }, label || '표 입력'), tableField(block));
-      if (block.id === 'card-info') wrap.append(cardInfoPolish(block));
       return wrap;
 
     case 'quiz': {
@@ -1077,6 +1156,7 @@ function blockDone(id) {
     case 'input.short': return !!(v && (v.text || '').trim().length >= 1);
     case 'input.long': return !!(v && (v.text || '').trim().length >= (blk.min || 1));
     case 'input.table': {
+      if (id === 'card-info') return !!(v && v.aiMade);
       const rows = (v && v.rows) || {};
       return (blk.rows || []).some((r) => (rows[r.key] || '').trim().length > 0);
     }
@@ -1264,8 +1344,9 @@ async function seedState() {
     + '넓적하게 자란 앞뿔로 눈을 파헤쳐 그 아래의 이끼와 지의류를 먹고, 되새김질로 에너지를 아낀다. '
     + '넓은 발굽으로 눈 위를 빠지지 않고 걸으며 먹이를 따라 무리 지어 이동한다. '
     + '봄에 한 배에 한 마리를 낳고 무리 전체가 새끼를 감싸 보호하며, 짧은 여름 동안 지방을 최대한 축적해 겨울을 난다.' });
-  set('card-info', { polished: true, rows: {
-    name: '눈털코뿔소', type: '얼음', habitat: '툰드라',
+  set('card-info', { aiMade: true, rows: {
+    name: '눈털코뿔소', habitat: '툰드라 / 극지방',
+    typeList: ['얼음', '땅'], type: '얼음 · 땅',
     ability: '눈폭풍 저항', weakness: '해빙기의 더위',
   } });
   set('ai-image', { url: PLACEHOLDER_IMG });
