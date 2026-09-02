@@ -6,9 +6,9 @@
    검토용이므로 라우팅·저장·인증은 없다. */
 
 // 블록 모듈은 캐시가 끈질겨 버전 쿼리를 붙인다. 블록 파일을 고치면 이 숫자를 올린다.
-import { drawHabitat } from './draw-habitat-block.js?b=6';
-import { datingSim } from './dating-sim-block.js?b=6';
-import { cardCollect } from './card-collect-block.js?b=6';
+import { drawHabitat } from './draw-habitat-block.js?b=7';
+import { datingSim } from './dating-sim-block.js?b=7';
+import { cardCollect } from './card-collect-block.js?b=7';
 import { get, set, _clear } from './state.js';
 import { loadFossilData } from './fossil-data.js';
 
@@ -1423,12 +1423,30 @@ function groupText(g) { return ({ 'solo': '개인', 'solo-or-pair': '개인 또�
 async function stepScreen(session, step, stepNoInSession) {
   const wrap = h('div', null);
 
+  const habitat = (get('draw-habitat') || {}).habitat;
+  const dating = get('dating-sim');
+  const dated = dating && dating.answer !== undefined && dating.problem;
+
+  const tag = (label, lines, title) => h('div', { class: 'pv-mytag', title: title || '' },
+    h('span', { class: 'pv-mytag-label', text: label }),
+    ...[].concat(lines).map((t) => h('span', { class: 'pv-mytag-value', text: t })));
+
+  const tags = [];
+  if (habitat) tags.push(tag('내 서식 환경', (habitat.icon ? habitat.icon + ' ' : '') + habitat.korName, habitat.desc || ''));
+  if (dated) {
+    const era = dating.problem.era || '';
+    const shortEra = (era.match(/\(([^)]+)\)/) || [])[1] || era.replace(/^.*\s/, '');
+    tags.push(tag('내 연대·시대', [dating.problem.displayAge.replace(/\s*\(.*\)$/, ''), shortEra], era));
+  }
+
   wrap.append(h('div', { class: 'pv-session-head' },
     h('div', { class: 'pv-session-no', text: String(session.no) }),
-    h('div', null,
+    h('div', { class: 'pv-session-headmain' },
       h('h2', { class: 'pv-session-title', text: `세션 ${session.no} · ${session.title}` }),
       h('p', { class: 'pv-session-tagline', text: session.tagline || '' }),
-    )));
+    ),
+    tags.length ? h('div', { class: 'pv-mytags' }, tags) : null,
+  ));
 
   const card = h('div', { class: 'pv-step' });
   const head = h('div', { class: 'pv-step-head' },

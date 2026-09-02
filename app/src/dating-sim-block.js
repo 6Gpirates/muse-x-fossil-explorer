@@ -70,6 +70,49 @@ function particleGrid(parentPercent) {
   return panel;
 }
 
+// 이 문제의 모원소 → 자원소를 보여주는 붕괴 도식
+function decayDiagram(p) {
+  const parts = String(p.element || '').split(/\s*(?:→|->|⟶)\s*/);
+  const parent = p.parent || parts[0] || p.element || '';
+  const daughter = p.daughter || parts[1] || '';
+
+  const chip = (kind, role, iso) => {
+    const c = document.createElement('div');
+    c.className = 'fx-decay-chip fx-decay-' + kind;
+    const dot = document.createElement('span');
+    dot.className = 'fx-decay-dot fx-atom-' + kind;
+    const box = document.createElement('div');
+    const r = document.createElement('div');
+    r.className = 'fx-decay-role';
+    r.textContent = role;
+    const n = document.createElement('div');
+    n.className = 'fx-decay-iso';
+    n.textContent = iso || '?';
+    box.append(r, n);
+    c.append(dot, box);
+    return c;
+  };
+
+  const arrow = document.createElement('div');
+  arrow.className = 'fx-decay-arrow';
+  const head = document.createElement('div');
+  head.className = 'fx-decay-arrow-head';
+  head.textContent = '→';
+  const lab = document.createElement('div');
+  lab.className = 'fx-decay-arrow-label';
+  lab.textContent = '붕괴';
+  arrow.append(lab, head);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'fx-decay';
+  wrap.append(
+    chip('parent', '모원소', parent),
+    arrow,
+    chip('daughter', '자원소', daughter),
+  );
+  return wrap;
+}
+
 function refTable(rows) {
   const t = document.createElement('table');
   t.className = 'fx-halflife-table';
@@ -131,13 +174,9 @@ export const datingSim = {
     }
     const p = value.problem;
 
+    root.appendChild(decayDiagram(p));
     root.appendChild(particleGrid(p.parentPercent));
     root.appendChild(refTable(data[block.tableRef || 'halfLifeTable']));
-
-    const elName = document.createElement('h4');
-    elName.className = 'fx-sim-element';
-    elName.textContent = p.element;
-    root.appendChild(elName);
 
     if (value.answer !== undefined) {
       root.appendChild(resultView(p, value));
