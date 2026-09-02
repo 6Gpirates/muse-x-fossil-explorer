@@ -273,6 +273,32 @@ body {
 }
 .pv-nav-hint { font-size: .8rem; color: var(--pv-amber); margin: 8px 0 0; text-align: right; }
 
+/* ── 적응 진화 점수 (4-2 · 이 수업의 핵심 평가) ─────────── */
+.pv-adapt {
+  border: 2px solid var(--pv-amber); border-radius: 12px;
+  padding: 14px; background: #fffdf8;
+}
+.pv-keystone {
+  background: var(--pv-amber-soft); border: 1px solid #f5d9b8;
+  border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;
+}
+.pv-keystone-tag {
+  margin: 0 0 3px; font-size: .72rem; font-weight: 800; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--pv-amber);
+}
+.pv-keystone-text { margin: 0; font-size: .84rem; font-weight: 600; line-height: 1.5; color: #7c3a09; }
+.pv-adapt-score {
+  display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
+  margin: 6px 0 4px; padding: 12px 14px; border-radius: 10px;
+  background: var(--pv-teal-soft); border: 1px solid #bfe0d9;
+}
+.pv-adapt-score[data-band="high"] { background: #ecfdf5; border-color: #a7f3d0; }
+.pv-adapt-score[data-band="mid"]  { background: #fef9ec; border-color: #fde68a; }
+.pv-adapt-score[data-band="low"]  { background: #fef2f2; border-color: #fecaca; }
+.pv-adapt-num { font-size: 2rem; font-weight: 800; line-height: 1; color: var(--pv-ink); }
+.pv-adapt-max { font-size: 1rem; font-weight: 700; color: var(--pv-ink-soft); }
+.pv-adapt-cap { font-size: .8rem; font-weight: 700; color: var(--pv-ink-soft); margin-left: auto; }
+
 .pv-mock-tag {
   float: right; font-size: .66rem; font-weight: 700; letter-spacing: .06em;
   color: var(--pv-ink-soft); background: #f1efe8; border: 1px solid var(--pv-line);

@@ -52,12 +52,18 @@
               ] }
           ],
           "advance": { "requires": ["env-research", "common-traits"] } },
-        { "id": "s3-02", "phase": "research", "title": "환경 퀴즈",
+        { "id": "s3-02", "phase": "research", "title": "내 서식 환경 퀴즈",
           "blocks": [
-            { "type": "text", "tone": "plain", "body": "내가 뽑은 환경에 대한 퀴즈입니다. 문제는 뽑은 환경과 내가 적은 조사 내용에 따라 그때그때 다르게 나옵니다." },
-            { "type": "quiz", "id": "mid-quiz", "label": "환경 적응 퀴즈", "questions": [{"key":"m1","q":"사막에 사는 동물에게 가장 흔히 나타나는 적응은?","choices":["몸에 물을 저장하거나 물 손실을 줄이는 구조","넓고 얇은 잎","두꺼운 지방층과 흰 털","발광 기관"],"answer":0,"why":"사막은 극도로 건조해 수분 보존이 생존의 핵심입니다."},{"key":"m2","q":"같은 서식 환경의 계통이 다른 생물들이 비슷한 생김새를 갖게 되는 현상은?","choices":["수렴 진화","돌연변이","공생","먹이 사슬"],"answer":0,"why":"비슷한 환경 압력이 계통이 달라도 유사한 형질을 만듭니다(수렴 진화)."}] }
+            { "type": "text", "tone": "plain", "body": "내가 뽑은 서식 환경에 대한 퀴즈입니다. 문제는 뽑은 환경과 내가 적은 조사 내용에 따라 그때그때 다르게 나옵니다." },
+            { "type": "quiz", "id": "mid-quiz", "label": "내 서식 환경 퀴즈", "questions": [{"key":"m1","q":"사막에 사는 동물에게 가장 흔히 나타나는 적응은?","choices":["몸에 물을 저장하거나 물 손실을 줄이는 구조","넓고 얇은 잎","두꺼운 지방층과 흰 털","발광 기관"],"answer":0,"why":"사막은 극도로 건조해 수분 보존이 생존의 핵심입니다."},{"key":"m2","q":"같은 서식 환경의 계통이 다른 생물들이 비슷한 생김새를 갖게 되는 현상은?","choices":["수렴 진화","돌연변이","공생","먹이 사슬"],"answer":0,"why":"비슷한 환경 압력이 계통이 달라도 유사한 형질을 만듭니다(수렴 진화)."}] }
           ],
-          "advance": { "requires": ["mid-quiz"] } }
+          "advance": { "requires": ["mid-quiz"] } },
+        { "id": "s3-03", "phase": "research", "title": "내 지질 시대 조사",
+          "blocks": [
+            { "type": "text", "tone": "plain", "body": "방사성 연대 측정으로 나온 '내 지질 시대'를 조사해 정리하세요. 아래 두 가지를 꼭 담습니다.\n· 그 시대의 환경 — 기후, 바다와 육지의 모습, 빙하 여부\n· 그 시대에 살던 동물들의 특징 — 대표 동물과 그들의 생김새·생활\n(한글 200자 내외)" },
+            { "type": "input.long", "id": "era-research", "label": "내 지질 시대는 어떤 시대였나 (그때의 환경 + 그때 살던 동물의 특징)", "min": 150 }
+          ],
+          "advance": { "requires": ["era-research"] } }
       ]
     },
     {
@@ -73,7 +79,7 @@
           "advance": { "requires": ["sketch", "bio-name"] } },
         { "id": "s4-02", "phase": "create", "title": "생물 설명",
           "blocks": [
-            { "type": "text", "tone": "plain", "body": "이 생물을 자세히 설명하세요. 아래 다섯 가지가 모두 드러나게 씁니다.\n· 몸의 구조 (크기·형태·특징)\n· 먹이와 에너지를 얻는 방법\n· 이동 방법\n· 체온·수분을 유지하는 방법\n· 번식·생존 전략\n(한글 200자 이상 써야 다음으로 넘어갈 수 있습니다.)" },
+            { "type": "text", "tone": "plain", "body": "이 생물을 자세히 설명하세요. 아래 다섯 가지가 모두 드러나게 씁니다.\n· 몸의 구조 (크기·형태·특징)\n· 먹이와 에너지를 얻는 방법\n· 이동 방법\n· 체온·수분을 유지하는 방법\n· 번식·생존 전략\n(한글 200자 이상 써야 다음으로 넘어갈 수 있습니다.)\n\n★ 이 설명은 이 수업에서 가장 중요한 활동입니다. 내가 부여받은 서식 환경과 지질 시대에 이 생물이 얼마나 잘 적응했는지를 AI가 '적응 진화 점수'(100점)로 매기며, 이 점수가 마지막 카드 등급을 가장 크게 좌우합니다. 환경·시대의 특징과 생물의 생김새·습성을 촘촘히 연결해 쓰세요." },
             { "type": "input.long", "id": "bio-desc", "label": "생물 상세 설명", "min": 200 }
           ],
           "advance": { "requires": ["bio-desc"] } }
@@ -118,13 +124,15 @@
             { "type": "card.collect", "id": "card-collect", "label": "내 생물 카드",
               "imageRef": "ai-image", "infoRef": "card-info", "quizRef": "final-quiz", "rarityRef": "rarity",
               "quizCount": 5,
+              "_signalNote": "bio-desc/quizscore = 적응 진화 점수(4-2, 100점). 이 수업의 핵심 평가라 가장 큰 가중치.",
               "signals": [
-                { "ref": "sketch", "kind": "strokes", "weight": 12, "full": 36 },
-                { "ref": "bio-desc", "kind": "textlen", "weight": 13, "full": 300 },
-                { "ref": "card-info", "kind": "fields", "weight": 15 },
-                { "ref": "common-traits", "kind": "rows", "weight": 10 },
-                { "ref": "env-research", "kind": "quizscore", "weight": 12 },
-                { "ref": "sketch", "kind": "quizscore", "weight": 8 }
+                { "ref": "bio-desc", "kind": "quizscore", "weight": 28 },
+                { "ref": "sketch", "kind": "strokes", "weight": 8, "full": 36 },
+                { "ref": "bio-desc", "kind": "textlen", "weight": 6, "full": 300 },
+                { "ref": "card-info", "kind": "fields", "weight": 8 },
+                { "ref": "common-traits", "kind": "rows", "weight": 6 },
+                { "ref": "env-research", "kind": "quizscore", "weight": 7 },
+                { "ref": "sketch", "kind": "quizscore", "weight": 7 }
               ] }
           ],
           "advance": { "requires": ["card-info", "card-collect"] } },
@@ -139,7 +147,7 @@
     }
   ],
   "deliverable": {
-    "collect": ["fossil-photo", "draw-habitat", "dating-sim", "env-research", "common-traits", "mid-quiz", "sketch", "bio-name", "bio-desc", "card-info", "ai-image", "sketch-vs-ai", "final-quiz", "card-collect"],
+    "collect": ["fossil-photo", "draw-habitat", "dating-sim", "env-research", "common-traits", "mid-quiz", "era-research", "sketch", "bio-name", "bio-desc", "card-info", "ai-image", "sketch-vs-ai", "final-quiz", "card-collect"],
     "export": ["pdf", "zip", "csv"]
   }
 }

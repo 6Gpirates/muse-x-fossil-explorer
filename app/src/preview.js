@@ -339,6 +339,82 @@ function envGrader(block) {
   return wrap;
 }
 
+/* ── 적응 진화 점수 (4-2 · 이 수업의 핵심 평가) ─────────────
+   내 생물 설명이 '부여받은 서식 환경 + 지질 시대'에 얼마나 잘 적응했는지
+   AI가 0~100점으로 채점한다. bio-desc 상태에 {correct,total:100,adaptFeedback} 저장.
+   카드 성급에서 가장 큰 가중치를 갖는다. */
+function adaptGrader(block) {
+  const wrap = h('div', { class: 'pv-aiwrap pv-adapt' });
+  const st = get(block.id) || {};
+  const status = h('p', { class: 'pv-upl-status' });
+  const habitat = myHabitatName();
+  const era = ((get('dating-sim') || {}).problem || {}).era || '';
+  const graded = typeof st.correct === 'number';
+
+  wrap.append(h('div', { class: 'pv-keystone' },
+    h('p', { class: 'pv-keystone-tag', text: '★ 이 수업의 핵심' }),
+    h('p', { class: 'pv-keystone-text', text:
+      '내가 그린 생물이 부여받은 서식 환경과 지질 시대에 얼마나 잘 적응했는지를 AI가 '
+      + '적응 진화 점수(100점)로 채점합니다. 이 점수가 마지막 카드 등급을 가장 크게 좌우합니다.' })));
+
+  if (graded) {
+    const pct = Math.round((st.correct / (st.total || 100)) * 100);
+    wrap.append(h('div', {
+      class: 'pv-adapt-score', 'data-band': pct >= 80 ? 'high' : (pct >= 55 ? 'mid' : 'low'),
+    },
+      h('span', { class: 'pv-adapt-num', text: String(st.correct) }),
+      h('span', { class: 'pv-adapt-max', text: '/ 100' }),
+      h('span', { class: 'pv-adapt-cap', text: '적응 진화 점수' })));
+    if (st.adaptFeedback) wrap.append(h('p', { class: 'pv-prose', text: 'AI 피드백 · ' + st.adaptFeedback }));
+    const redo = h('button', { class: 'pv-quiz-reveal-btn', type: 'button', text: '설명 고치고 다시 채점' });
+    redo.addEventListener('click', () => {
+      patch(block.id, { correct: undefined, total: undefined, adaptFeedback: undefined });
+      updateProgress();
+      render();
+    });
+    wrap.append(redo);
+    return wrap;
+  }
+
+  const btn = h('button', { class: 'pv-btn-mock', type: 'button', text: '적응 진화 점수 받기' });
+  btn.addEventListener('click', async () => {
+    const text = ((get(block.id) || {}).text || '').trim();
+    const need = block.min || 200;
+    if (text.length < need) { status.textContent = `${need}자 이상 쓴 뒤 채점받으세요.`; return; }
+    if (!aiConfig()) { status.textContent = 'AI 채점이 설정되지 않았습니다.'; return; }
+    if (!habitat || !era) { status.textContent = '먼저 서식 환경 뽑기와 방사성 연대 측정을 마쳐야 합니다.'; return; }
+    btn.disabled = true;
+    status.textContent = '적응도를 채점하는 중…';
+    try {
+      const eraResearch = (get('era-research') || {}).text || '';
+      const traits = Object.values((get('common-traits') || {}).rows || {}).filter(Boolean).join(', ');
+      const r = await generateText(
+        '중학교 과학 수업의 핵심 평가다. 학생이 가상의 생물을 만들고, 그 생물이 '
+        + `'${habitat}' 서식 환경과 '${era}' 지질 시대에 적응해 진화했다고 설명했다. `
+        + '이 설명이 해당 환경과 시대의 실제 특징(기후·지형·먹이·경쟁·그 시대의 생물상)에 비추어 '
+        + '얼마나 과학적으로 타당하고 정교하게 "적응"을 연결했는지 0~100점(정수)으로 채점하라. '
+        + '몸의 구조·먹이·이동·체온과 수분·번식 전략이 환경/시대의 압력과 인과적으로 이어질수록 높게, '
+        + '환경과 무관하거나 모순되면 낮게. 중학생 수준을 감안하되 근거 없는 나열은 감점하라. '
+        + '한국어로 잘한 점과 보완점을 한두 문장으로 짚어라.\n'
+        + 'JSON만 출력: {"score": 정수, "feedback": "문장"}\n\n'
+        + (eraResearch ? `학생의 지질 시대 조사: ${eraResearch}\n` : '')
+        + (traits ? `학생이 정리한 이 환경 생물의 공통 속성: ${traits}\n` : '')
+        + `학생의 생물 설명:\n${text}`,
+        true,
+      );
+      const score = Math.max(0, Math.min(100, Math.round(Number(r.score) || 0)));
+      patch(block.id, { correct: score, total: 100, adaptFeedback: String(r.feedback || '') });
+      updateProgress();
+      await render();
+    } catch (e) {
+      status.textContent = '채점 실패: ' + (e && e.message ? e.message : e);
+      btn.disabled = false;
+    }
+  });
+  wrap.append(btn, status);
+  return wrap;
+}
+
 /* ── 카드 만들기 (이름·서식지 자동 / 타입·능력·약점 AI 판단) ── */
 const CARD_TYPES = ['물', '불', '땅', '하늘', '자연', '전기', '드래곤', '독', '빛', '어둠', '바다', '얼음'];
 const TYPE_COLOR = {
@@ -692,10 +768,17 @@ function mockBlock(block) {
       wrap.append(h('p', { class: 'pv-block-label' }, label || ''), textField(block, false));
       return wrap;
 
-    case 'input.long':
+    case 'input.long': {
+      if (block.id === 'era-research') {
+        const era = ((get('dating-sim') || {}).problem || {}).era;
+        wrap.append(h('p', { class: 'pv-prose', text: era
+          ? `측정으로 나온 내 지질 시대: ${era}` : '세션 2에서 방사성 연대 측정을 마치면 여기에 내 지질 시대가 표시됩니다.' }));
+      }
       wrap.append(h('p', { class: 'pv-block-label' }, label || ''), textField(block, true));
       if (block.id === 'env-research') wrap.append(envGrader(block));
+      if (block.id === 'bio-desc') wrap.append(adaptGrader(block));
       return wrap;
+    }
 
     case 'input.table':
       if (block.id === 'card-info') { wrap.append(cardMakeBlock(block)); return wrap; }
@@ -733,7 +816,7 @@ function mockBlock(block) {
 
       // 환경 퀴즈는 뽑은 환경 + 내 조사 내용으로 그때그때 생성한다.
       if (isEnvQuiz) {
-        const genBtn = h('button', { class: 'pv-btn-mock', type: 'button', text: cur.questions ? '문제 새로 생성' : '환경 퀴즈 생성' });
+        const genBtn = h('button', { class: 'pv-btn-mock', type: 'button', text: cur.questions ? '문제 새로 생성' : '내 서식 환경 퀴즈 생성' });
         genBtn.addEventListener('click', async () => {
           if (!aiConfig()) { status.textContent = 'AI가 설정되지 않았습니다.'; return; }
           genBtn.disabled = true;
@@ -765,7 +848,7 @@ function mockBlock(block) {
         });
         wrap.append(genBtn, status);
         if (!cur.questions) {
-          wrap.append(h('p', { class: 'pv-prose', text: '내가 뽑은 환경과 조사 내용을 바탕으로 문제가 생성됩니다.' }));
+          wrap.append(h('p', { class: 'pv-prose', text: '내가 뽑은 서식 환경과 조사 내용을 바탕으로 문제가 생성됩니다.' }));
           return wrap;
         }
         status.textContent = '';
@@ -1344,7 +1427,12 @@ function blockDone(id) {
       return true;
     }
     case 'input.short': return !!(v && (v.text || '').trim().length >= 1);
-    case 'input.long': return !!(v && (v.text || '').trim().length >= (blk.min || 1));
+    case 'input.long': {
+      if (!(v && (v.text || '').trim().length >= (blk.min || 1))) return false;
+      // 생물 설명(4-2)은 적응 진화 점수(핵심 평가)까지 받아야 통과
+      if (blk.id === 'bio-desc' && aiConfig()) return typeof v.correct === 'number';
+      return true;
+    }
     case 'input.table': {
       if (id === 'card-info') return !!(v && v.aiMade);
       const rows = (v && v.rows) || {};
@@ -1548,6 +1636,13 @@ async function seedState() {
     { key: 'e2', q: '툰드라 초식동물이 먹이를 얻는 방식으로 가장 알맞은 것은?', choices: ['눈을 헤쳐 이끼·지의류를 먹는다', '나무 열매를 대량으로 저장한다', '물속 플랑크톤을 걸러 먹는다', '수액을 빨아 먹는다'], answer: 0, why: '툰드라의 대표 먹이는 이끼와 지의류이며, 눈 아래에서 찾아 먹습니다.' },
     { key: 'e3', q: '툰드라 환경에서 몸집이 큰 동물이 유리한 이유는?', choices: ['천적이 전혀 없어서', '부피 대비 표면적이 작아 열을 덜 잃어서', '먹이가 매우 풍부해서', '더위를 피하기 쉬워서'], answer: 1, why: '몸집이 클수록 표면적 비율이 낮아 체온 손실이 적습니다(베르그만 법칙).' },
   ] });
+  set('era-research', {
+    text:
+      '후기 플라이스토세는 마지막 빙하기가 이어지던 때로, 북반구 대륙의 상당 부분이 두꺼운 빙상과 얼어붙은 툰드라로 덮여 있었다. '
+      + '평균 기온이 지금보다 5~10도 낮았고, 바닷물이 빙하로 묶이면서 해수면이 100m 넘게 낮아져 대륙과 섬이 육지로 이어지기도 했다. '
+      + '이 시대에는 매머드·털코뿔소·동굴곰·큰뿔사슴처럼 몸집이 크고 두꺼운 털과 지방층을 지닌 대형 포유류가 번성했다. '
+      + '이들은 넓은 발굽으로 눈밭을 걷고 무리를 지어 이동하며 눈 아래의 풀과 이끼를 먹었고, 초기 인류도 이 동물들을 사냥하며 살았다.',
+  });
   set('sketch', {
     image: PLACEHOLDER_SKETCH, strokes: new Array(40).fill([0, 0]),
     correct: 4, total: 5,
@@ -1555,11 +1650,15 @@ async function seedState() {
   });
   _autoMatchFired.add('sketch');
   set('bio-name', { text: '눈털코뿔소' });
-  set('bio-desc', { text:
-    '몸길이 3.5m가 넘는 대형 초식동물로, 온몸이 촘촘한 겉털과 두꺼운 지방층으로 덮여 있어 영하 40도의 눈보라도 견딘다. '
-    + '넓적하게 자란 앞뿔로 눈을 파헤쳐 그 아래의 이끼와 지의류를 먹고, 되새김질로 에너지를 아낀다. '
-    + '넓은 발굽으로 눈 위를 빠지지 않고 걸으며 먹이를 따라 무리 지어 이동한다. '
-    + '봄에 한 배에 한 마리를 낳고 무리 전체가 새끼를 감싸 보호하며, 짧은 여름 동안 지방을 최대한 축적해 겨울을 난다.' });
+  set('bio-desc', {
+    text:
+      '몸길이 3.5m가 넘는 대형 초식동물로, 온몸이 촘촘한 겉털과 두꺼운 지방층으로 덮여 있어 영하 40도의 눈보라도 견딘다. '
+      + '넓적하게 자란 앞뿔로 눈을 파헤쳐 그 아래의 이끼와 지의류를 먹고, 되새김질로 에너지를 아낀다. '
+      + '넓은 발굽으로 눈 위를 빠지지 않고 걸으며 먹이를 따라 무리 지어 이동한다. '
+      + '봄에 한 배에 한 마리를 낳고 무리 전체가 새끼를 감싸 보호하며, 짧은 여름 동안 지방을 최대한 축적해 겨울을 난다.',
+    correct: 90, total: 100,
+    adaptFeedback: '후기 플라이스토세 툰드라의 추위·먹이 부족과 생물의 털·지방·발굽·되새김질을 인과적으로 잘 연결했습니다. 번식 전략을 그 시대의 포식 압력(초기 인류·대형 육식동물)과 더 엮으면 더욱 탄탄해집니다.',
+  });
   set('card-info', { aiMade: true, rows: {
     name: '눈털코뿔소', habitat: '툰드라 / 극지방',
     typeList: ['얼음', '땅'], type: '얼음 · 땅',

@@ -15,19 +15,20 @@
     { "korName": "심해", "engName": "(Deep Ocean)", "desc": "빛이 닿지 않는 암흑과 상상을 초월하는 초고압, 극한의 저온 및 열수구가 공존하는 미지의 세계입니다.", "icon": "🐙" }
   ],
 
+  "_datingNote": "이 수업은 '그릴 만한 대형 생물이 번성한 시대'만 다룬다. 미생물 위주의 선캄브리아는 제외하고 신생대 제4기(빙하기~홀로세) 범위로 한정한다.",
   "datingProblems": [
-    { "element": "탄소-14 (¹⁴C) → 질소-14 (¹⁴N)", "parent": "탄소-14 (¹⁴C)", "daughter": "질소-14 (¹⁴N)", "halfLifeText": "약 5,700년", "halfLifeVal": 5700, "ratioText": "1 : 1 (모원소 50% 잔여)", "parentPercent": 50, "halfLifeCount": 1, "unit": "년", "correctAnswer": 5700, "displayAge": "약 5,700년 전", "era": "신생대 제4기 (홀로세)", "explanation": "모원소와 자원소의 비가 1:1이므로 반감기가 1회(50%) 경과했습니다. 따라서 5,700년 × 1 = 5,700년 전입니다." },
-    { "element": "토륨-230 (²³⁰Th) → 라듐-226 (²²⁶Ra)", "parent": "토륨-230 (²³⁰Th)", "daughter": "라듐-226 (²²⁶Ra)", "halfLifeText": "약 7만 5천 년 (75,000년)", "halfLifeVal": 75000, "ratioText": "1 : 1 (모원소 50% 잔여)", "parentPercent": 50, "halfLifeCount": 1, "unit": "년", "correctAnswer": 75000, "displayAge": "약 75,000년 전 (7만 5천 년 전)", "era": "신생대 제4기 (후기 플라이스토세)", "explanation": "모원소와 자원소의 비가 1:1이므로 반감기가 1회 경과했습니다. 따라서 75,000년 × 1 = 75,000년 전입니다." },
-    { "element": "토륨-230 (²³⁰Th) → 라듐-226 (²²⁶Ra)", "parent": "토륨-230 (²³⁰Th)", "daughter": "라듐-226 (²²⁶Ra)", "halfLifeText": "약 7만 5천 년 (75,000년)", "halfLifeVal": 75000, "ratioText": "1 : 3 (모원소 25% 잔여)", "parentPercent": 25, "halfLifeCount": 2, "unit": "년", "correctAnswer": 150000, "displayAge": "약 150,000년 전 (15만 년 전)", "era": "신생대 제4기 (중기 플라이스토세)", "explanation": "모원소:자원소 비가 1:3으로 모원소가 전체의 1/4(25%) 남아있어 반감기가 2회 경과했습니다. 따라서 75,000년 × 2 = 150,000년 전입니다." },
-    { "element": "우라늄-235 (²³⁵U) → 납-207 (²⁰⁷Pb)", "parent": "우라늄-235 (²³⁵U)", "daughter": "납-207 (²⁰⁷Pb)", "halfLifeText": "약 7억 년", "halfLifeVal": 7, "ratioText": "1 : 3 (모원소 25% 잔여)", "parentPercent": 25, "halfLifeCount": 2, "unit": "억 년", "correctAnswer": 14, "displayAge": "약 14억 년 전", "era": "선캄브리아 시대 (중원생대 후기)", "explanation": "모원소:자원소 비가 1:3으로 모원소가 1/4(25%) 남아있어 반감기가 2회 경과했습니다. 따라서 7억 년 × 2 = 14억 년 전입니다." },
-    { "element": "우라늄-238 (²³⁸U) → 납-206 (²⁰⁶Pb)", "parent": "우라늄-238 (²³⁸U)", "daughter": "납-206 (²⁰⁶Pb)", "halfLifeText": "약 45억 년 (약 44억 7천만 년)", "halfLifeVal": 45, "ratioText": "1 : 1 (모원소 50% 잔여)", "parentPercent": 50, "halfLifeCount": 1, "unit": "억 년", "correctAnswer": 45, "displayAge": "약 45억 년 전", "era": "선캄브리아 시대 (명왕누대 지구 형성기)", "explanation": "모원소와 자원소 비가 1:1로 반감기가 1회 경과했습니다. 따라서 45억 년 × 1 = 45억 년 전으로 지구 탄생 초기입니다." }
+    { "element": "탄소-14 (¹⁴C) → 질소-14 (¹⁴N)", "parent": "탄소-14 (¹⁴C)", "daughter": "질소-14 (¹⁴N)", "halfLifeText": "약 5,700년", "halfLifeVal": 5700, "ratioText": "1 : 1 (모원소 50% 잔여)", "parentPercent": 50, "halfLifeCount": 1, "unit": "년", "correctAnswer": 5700, "displayAge": "약 5,700년 전", "era": "신생대 제4기 (홀로세)", "explanation": "모원소와 자원소의 비가 1:1이므로 반감기가 1회(50%) 경과했습니다. 따라서 5,700년 × 1 = 5,700년 전으로, 지금과 같은 따뜻한 간빙기인 홀로세에 해당합니다." },
+    { "element": "토륨-230 (²³⁰Th) → 라듐-226 (²²⁶Ra)", "parent": "토륨-230 (²³⁰Th)", "daughter": "라듐-226 (²²⁶Ra)", "halfLifeText": "약 7만 5천 년 (75,000년)", "halfLifeVal": 75000, "ratioText": "1 : 1 (모원소 50% 잔여)", "parentPercent": 50, "halfLifeCount": 1, "unit": "년", "correctAnswer": 75000, "displayAge": "약 75,000년 전 (7만 5천 년 전)", "era": "신생대 제4기 (후기 플라이스토세)", "explanation": "모원소와 자원소의 비가 1:1이므로 반감기가 1회 경과했습니다. 따라서 75,000년 × 1 = 75,000년 전으로, 마지막 빙하기의 추위가 이어지던 후기 플라이스토세입니다." },
+    { "element": "토륨-230 (²³⁰Th) → 라듐-226 (²²⁶Ra)", "parent": "토륨-230 (²³⁰Th)", "daughter": "라듐-226 (²²⁶Ra)", "halfLifeText": "약 7만 5천 년 (75,000년)", "halfLifeVal": 75000, "ratioText": "1 : 3 (모원소 25% 잔여)", "parentPercent": 25, "halfLifeCount": 2, "unit": "년", "correctAnswer": 150000, "displayAge": "약 150,000년 전 (15만 년 전)", "era": "신생대 제4기 (중기 플라이스토세)", "explanation": "모원소:자원소 비가 1:3으로 모원소가 전체의 1/4(25%) 남아 반감기가 2회 경과했습니다. 따라서 75,000년 × 2 = 150,000년 전으로, 빙기와 간빙기가 되풀이되던 중기 플라이스토세입니다." },
+    { "element": "탄소-14 (¹⁴C) → 질소-14 (¹⁴N)", "parent": "탄소-14 (¹⁴C)", "daughter": "질소-14 (¹⁴N)", "halfLifeText": "약 5,700년", "halfLifeVal": 5700, "ratioText": "1 : 3 (모원소 25% 잔여)", "parentPercent": 25, "halfLifeCount": 2, "unit": "년", "correctAnswer": 11400, "displayAge": "약 11,400년 전", "era": "신생대 제4기 (마지막 빙기 끝 무렵 · 플라이스토세에서 홀로세로 넘어가던 시기)", "explanation": "모원소:자원소 비가 1:3으로 모원소가 전체의 1/4(25%) 남아 반감기가 2회 경과했습니다. 따라서 5,700년 × 2 = 11,400년 전으로, 마지막 빙하기가 끝나고 기후가 빠르게 따뜻해지던 무렵입니다." },
+    { "element": "우라늄-234 (²³⁴U) → 토륨-230 (²³⁰Th)", "parent": "우라늄-234 (²³⁴U)", "daughter": "토륨-230 (²³⁰Th)", "halfLifeText": "약 24만 5천 년 (245,000년)", "halfLifeVal": 245000, "ratioText": "1 : 1 (모원소 50% 잔여)", "parentPercent": 50, "halfLifeCount": 1, "unit": "년", "correctAnswer": 245000, "displayAge": "약 245,000년 전 (24만 5천 년 전)", "era": "신생대 제4기 (중기 플라이스토세)", "explanation": "모원소와 자원소의 비가 1:1이므로 반감기가 1회 경과했습니다. 따라서 245,000년 × 1 = 245,000년 전으로, 여러 차례의 빙기가 지나간 중기 플라이스토세입니다." }
   ],
 
   "halfLifeTable": [
     { "label": "탄소-14 (¹⁴C)",   "value": "약 5,700년" },
     { "label": "토륨-230 (²³⁰Th)", "value": "약 7만 5천 년" },
+    { "label": "우라늄-234 (²³⁴U)", "value": "약 24만 5천 년" },
     { "label": "우라늄-235 (²³⁵U)", "value": "약 7억 년" },
-    { "label": "칼륨-40 (⁴⁰K)",    "value": "약 13억 년" },
     { "label": "우라늄-238 (²³⁸U)", "value": "약 45억 년" }
   ],
 
