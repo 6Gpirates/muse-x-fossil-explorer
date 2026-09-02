@@ -3,3 +3,7 @@ node_modules/
 *.log
 .env
 .superpowers/
+
+# 로컬 전용 (API 키 등) — 절대 커밋 금지
+*.local.js
+app/src/preview.local.js
