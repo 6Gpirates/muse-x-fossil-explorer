@@ -10,6 +10,14 @@
 </head>
 <body>
   <div id="app" class="pv-loading">불러오는 중…</div>
+  <!-- 부모 프레임(6GPirates)에서 postMessage로 AI 설정을 주입받는다 -->
+  <script>
+  window.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'ai-config' && e.data.config) {
+      window.PREVIEW_AI = e.data.config;
+    }
+  });
+  </script>
   <!-- 로컬 전용 설정(API 키). GitHub 에는 없으므로 404 나도 정상. -->
   <script src="./src/preview.local.js" onerror="this.remove()"></script>
   <script type="module" src="./src/preview.js?v=36"></script>
