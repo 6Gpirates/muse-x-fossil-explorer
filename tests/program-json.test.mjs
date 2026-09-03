@@ -8,9 +8,21 @@ function allBlocks() {
   return prog.sessions.flatMap((s) => s.steps.flatMap((st) => st.blocks));
 }
 
-test('세션 6개, 각 세션 no 오름차순', () => {
-  assert.equal(prog.sessions.length, 6);
-  assert.deepEqual(prog.sessions.map((s) => s.no), [1, 2, 3, 4, 5, 6]);
+test('세션 7개, 각 세션 no 오름차순', () => {
+  assert.equal(prog.sessions.length, 7);
+  assert.deepEqual(prog.sessions.map((s) => s.no), [1, 2, 3, 4, 5, 6, 7]);
+});
+
+test('세션 6 = AI 분류 분석: taxonomy.ai 블록이 ai-image 를 참조', () => {
+  const tax = allBlocks().find((b) => b.type === 'taxonomy.ai');
+  assert.ok(tax, 'taxonomy.ai 블록 없음');
+  const ids = new Set(allBlocks().filter((b) => b.id).map((b) => b.id));
+  assert.ok(ids.has(tax.imageRef), `taxonomy.ai imageRef ${tax.imageRef} 가 블록에 없음`);
+  assert.ok(ids.has(tax.nameRef), `taxonomy.ai nameRef ${tax.nameRef} 가 블록에 없음`);
+  // 분류 단계는 AI 실사(세션 5) 뒤, 카드(마지막 세션) 앞
+  const order = prog.sessions.flatMap((s) => s.steps.flatMap((st) => st.blocks.map((b) => b.type)));
+  assert.ok(order.indexOf('taxonomy.ai') > order.indexOf('ai.collect'));
+  assert.ok(order.indexOf('taxonomy.ai') < order.indexOf('card.collect'));
 });
 
 test('신규 블록 3종이 모두 사용됨', () => {
@@ -38,6 +50,7 @@ test('card.collect 의 참조(ref) 대상이 모두 존재', () => {
   const ids = new Set(allBlocks().filter((b) => b.id).map((b) => b.id));
   const card = allBlocks().find((b) => b.type === 'card.collect');
   for (const r of [card.imageRef, card.infoRef, card.quizRef]) assert.ok(ids.has(r), `${r} 없음`);
+  if (card.taxonomyRef) assert.ok(ids.has(card.taxonomyRef), `taxonomyRef ${card.taxonomyRef} 없음`);
   for (const sig of card.signals) assert.ok(ids.has(sig.ref), `signal ref ${sig.ref} 없음`);
   assert.equal(card.signals.reduce((s, x) => s + x.weight, 0), 70);
 });

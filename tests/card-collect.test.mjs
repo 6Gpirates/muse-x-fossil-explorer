@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { cardCollect, signalRatio, quizPassed } from '../app/src/card-collect-block.js';
+import { cardCollect, signalRatio, quizPassed, taxonomyLine } from '../app/src/card-collect-block.js';
 import { computeRarity } from '../app/src/rarity.js';
 import { makeCtx } from './helpers/mock-ctx.mjs';
 
@@ -118,4 +118,47 @@ test('_open: 형제 블록 값으로 카드 값 산출 (I4)', async () => {
   assert.ok(v.detailScore >= 0 && v.detailScore <= 70);
   assert.ok(v.total <= 100);
   assert.equal(v.snapshot.name, '가');
+});
+
+test('taxonomyLine: 계~과의 한국어명만 › 로 잇는다', () => {
+  const ranks = {
+    kingdom: '동물계 Animalia', phylum: '척삭동물문 Chordata', class: '포유강 Mammalia',
+    order: '장비목 Proboscidea', family: '매머드과 Elephantidae',
+    genus: 'Coelodonta', species: 'Coelodonta nivalis',
+  };
+  assert.equal(taxonomyLine(ranks), '동물계 › 척삭동물문 › 포유강 › 장비목 › 매머드과');
+  assert.equal(taxonomyLine(null), '');
+  assert.equal(taxonomyLine({}), '');
+});
+
+test('_open: taxonomyRef 있으면 snapshot 에 학명·분류 한 줄이 실린다', async () => {
+  const block = {
+    id: 'card-collect', rarityRef: 'rarity',
+    imageRef: 'ai-image', infoRef: 'card-info', quizRef: 'final-quiz', taxonomyRef: 'taxonomy',
+    signals: [{ ref: 'card-info', kind: 'fields', weight: 10 }],
+  };
+  const values = {
+    'card-info': { rows: { 이름: '눈털코뿔소' } },
+    'ai-image': { url: 'data:img' },
+    taxonomy: {
+      scientificName: 'Coelodonta nivalis',
+      taxonomy: { kingdom: '동물계 Animalia', phylum: '척삭동물문 Chordata', class: '포유강 Mammalia', order: '기제목 Perissodactyla', family: '코뿔소과 Rhinocerotidae' },
+    },
+  };
+  const ctx = makeCtx({ getValue: (ref) => values[ref] ?? null });
+  const v = await cardCollect._open(block, ctx);
+  assert.equal(v.snapshot.scientificName, 'Coelodonta nivalis');
+  assert.equal(v.snapshot.taxonomyLine, '동물계 › 척삭동물문 › 포유강 › 기제목 › 코뿔소과');
+});
+
+test('_open: taxonomyRef 없으면 학명·분류는 빈 문자열', async () => {
+  const block = {
+    id: 'card-collect', rarityRef: 'rarity',
+    imageRef: 'ai-image', infoRef: 'card-info', quizRef: 'final-quiz',
+    signals: [{ ref: 'card-info', kind: 'fields', weight: 10 }],
+  };
+  const ctx = makeCtx({ getValue: (ref) => ({ 'card-info': { rows: { 이름: '가' } }, 'ai-image': { url: 'd' } }[ref] ?? null) });
+  const v = await cardCollect._open(block, ctx);
+  assert.equal(v.snapshot.scientificName, '');
+  assert.equal(v.snapshot.taxonomyLine, '');
 });

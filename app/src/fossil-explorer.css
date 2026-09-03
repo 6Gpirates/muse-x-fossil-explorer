@@ -181,6 +181,17 @@
   text-shadow: 0 1px 3px rgba(0, 0, 0, .55);
   z-index: 1;
 }
+.fx-card-sci {
+  position: relative; font-style: italic; font-size: .8rem;
+  color: #a5b4fc; margin: 3px 0 1px;
+}
+.fx-card-taxa {
+  position: relative; font-size: .68rem; line-height: 1.35;
+  color: #94a3b8; opacity: .9; margin: 0 0 3px; word-break: keep-all;
+}
+/* 축소 썸네일(도감·친구 카드 그리드)에서는 학명만, 7단계 줄은 생략해 카드가 넘치지 않게 */
+.pv-mini-card .fx-card-taxa { display: none; }
+.pv-mini-card .fx-card-sci { font-size: .72rem; margin: 2px 0 0; }
 .fx-card-meta {
   position: relative; display: flex; gap: 10px; flex-wrap: wrap;
   font-size: .8rem; opacity: .85; margin: 4px 0;

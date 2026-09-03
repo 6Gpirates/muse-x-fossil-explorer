@@ -8,7 +8,7 @@
 // 블록 모듈은 캐시가 끈질겨 버전 쿼리를 붙인다. 블록 파일을 고치면 이 숫자를 올린다.
 import { drawHabitat } from './draw-habitat-block.js?b=7';
 import { datingSim } from './dating-sim-block.js?b=7';
-import { cardCollect } from './card-collect-block.js?b=7';
+import { cardCollect } from './card-collect-block.js?b=8';
 import { get, set, _clear } from './state.js';
 import { loadFossilData } from './fossil-data.js';
 
@@ -30,7 +30,7 @@ const PLACEHOLDER_IMG = placeholderImg('AI 실사 이미지 (예시)', '#334155'
 const PLACEHOLDER_PHOTO = placeholderImg('화석 사진 (예시)', '#57534e', '#f5f5f4');
 const PLACEHOLDER_SKETCH = placeholderImg('학생 손그림 (예시)', '#f5f5f4', '#78716c');
 
-/* ── 가상 동급생 5명 (공유의 장·친구 카드·도감북용) ──────────
+/* ── 가상 동급생 5명 (카드 도감·친구 카드·도감북용) ──────────
    실제 여러 기기 동기화가 아니라, 혼자서도 협업 기능을 체험하도록 미리 만든 학생들. */
 const TIER_CLASS = ['rar-normal', 'rar-uncommon', 'rar-rare', 'rar-superrare', 'rar-legendary'];
 const TIER_NAME = ['노멀', '언커먼', '레어', '슈퍼레어', '레전더리'];
@@ -39,6 +39,8 @@ const SAMPLE_PEERS = [
   {
     id: 'p1', name: '김하늘', habitat: '심해', color: '#0b2447',
     creatureName: '빛등아귀', stars: 4, envGrade: 5,
+    scientificName: 'Photonophrys abyssalis',
+    taxonomyLine: '동물계 › 척삭동물문 › 조기어강 › 아귀목 › 아귀과',
     creatureDesc: '빛이 닿지 않는 심해에 사는 육식 어류. 등에 달린 발광 돌기로 먹이를 유인하고, 젤리 같은 몸으로 높은 수압을 견딘다. 거의 움직이지 않고 매복해 에너지를 아끼며, 큰 입으로 자기 몸집만 한 먹이도 삼킨다.',
     cardInfo: { type: '어둠', habitat: '심해', ability: '발광 유인', weakness: '수면의 빛' },
     traits: { body: '젤리질 몸·큰 입', food: '매복 사냥', move: '거의 정지, 지느러미 미세 조절', temp: '저수온에 적응한 대사', repro: '알을 물기둥에 띄워 산란' },
@@ -52,6 +54,8 @@ const SAMPLE_PEERS = [
   {
     id: 'p2', name: '박도윤', habitat: '사막', color: '#7c4a13',
     creatureName: '모래숨거북', stars: 3, envGrade: 3,
+    scientificName: 'Psammochelys occulta',
+    taxonomyLine: '동물계 › 척삭동물문 › 파충강 › 거북목 › 땅거북과',
     creatureDesc: '한낮의 열기를 피해 모래 속에 몸을 묻고, 밤에 나와 이슬과 다육식물을 먹는다. 두꺼운 등딱지와 각질 피부로 수분 손실을 막고, 오줌을 거의 누지 않아 물을 아낀다.',
     cardInfo: { type: '땅', habitat: '사막', ability: '모래 잠복', weakness: '장마' },
     traits: { body: '두꺼운 등딱지·각질 피부', food: '다육식물·이슬', move: '느린 보행, 모래 파기', temp: '낮에 굴속, 밤에 활동', repro: '모래에 알을 묻어 부화' },
@@ -65,6 +69,8 @@ const SAMPLE_PEERS = [
   {
     id: 'p3', name: '이서아', habitat: '열대우림', color: '#14532d',
     creatureName: '잎무늬표범', stars: 5, envGrade: 5,
+    scientificName: 'Neofelis frondonota',
+    taxonomyLine: '동물계 › 척삭동물문 › 포유강 › 식육목 › 고양이과',
     creatureDesc: '나무 위에서 대부분을 보내는 육식동물. 잎맥 무늬 털로 완벽하게 위장하고, 긴 꼬리로 균형을 잡으며 가지 사이를 도약한다. 습한 더위에 적응해 얇은 털과 넓은 발바닥을 가졌다.',
     cardInfo: { type: '자연', habitat: '열대우림', ability: '잎 위장', weakness: '건기' },
     traits: { body: '잎맥 무늬 털·긴 꼬리', food: '나무 위 소형 포유류', move: '가지 도약·활공', temp: '얇은 털로 발열 억제', repro: '나무 구멍에 새끼를 숨김' },
@@ -78,6 +84,8 @@ const SAMPLE_PEERS = [
   {
     id: 'p4', name: '최지호', habitat: '툰드라 / 극지방', color: '#1e3a5f',
     creatureName: '흰털뿔사슴', stars: 2, envGrade: 2,
+    scientificName: 'Chionelaphus barbata',
+    taxonomyLine: '동물계 › 척삭동물문 › 포유강 › 소목 › 사슴과',
     creatureDesc: '두꺼운 흰 털과 지방층으로 눈보라를 견디는 초식동물. 넓은 발굽으로 눈 위를 걷고, 뿔로 눈을 파헤쳐 이끼를 먹는다.',
     cardInfo: { type: '얼음', habitat: '툰드라', ability: '방한', weakness: '해빙기' },
     traits: { body: '흰 겉털·두꺼운 지방', food: '이끼·지의류', move: '넓은 발굽 보행', temp: '털·지방 단열', repro: '봄 출산, 무리 보호' },
@@ -91,6 +99,8 @@ const SAMPLE_PEERS = [
   {
     id: 'p5', name: '정하은', habitat: '습지 / 맹그로브', color: '#3f3d1e',
     creatureName: '진흙물떼새악어', stars: 3, envGrade: 4,
+    scientificName: 'Limnoscolopax paludis',
+    taxonomyLine: '동물계 › 척삭동물문 › 조강 › 도요목 › 도요과',
     creatureDesc: '담수와 해수가 섞이는 갯벌에 산다. 넓적한 부리로 진흙 속 게와 조개를 파먹고, 물갈퀴 발로 진창을 걷는다. 콧구멍이 머리 위에 있어 몸을 숨긴 채 숨을 쉰다.',
     cardInfo: { type: '바다', habitat: '맹그로브 습지', ability: '진흙 잠복', weakness: '갯벌 매립' },
     traits: { body: '넓적 부리·물갈퀴 발', food: '게·조개', move: '진창 보행·짧은 수영', temp: '갯벌 그늘 이용', repro: '갈대밭에 둥지' },
@@ -124,10 +134,13 @@ function myProgressFrac() {
 }
 function myProfile() {
   const info = (get('card-info') || {}).rows || {};
+  const tax = get('taxonomy') || {};
   return {
     id: 'me', name: '나 (이 화면)',
     habitat: myHabitatName() || '환경 미정',
     creatureName: (get('bio-name') || {}).text || info.name || '이름 미정',
+    scientificName: tax.scientificName || '',
+    taxonomyLine: taxonomyLineOf(tax.taxonomy),
     creatureDesc: (get('bio-desc') || {}).text || '',
     cardInfo: { type: info.type || '', habitat: info.habitat || '', ability: info.ability || '', weakness: info.weakness || '' },
     envGrade: (get('env-research') || {}).correct,
@@ -154,7 +167,11 @@ function allStudents() {
 const ctx = {
   refreshFooter: () => render(),
   getValue: (ref) => get(ref),
-  studentKey: 'preview-teacher',
+  // 카드 가챠 행운값을 학생별로 — 학번+학교가 있으면 그것으로, 없으면 익명
+  get studentKey() {
+    const s = get('student');
+    return s && s.id ? `${(s.school || '').trim()}/${String(s.id).trim()}` : 'preview-anon';
+  },
   assembledPrompt: () => '',
   summaryOf: () => null,
   peers: () => [],
@@ -741,6 +758,76 @@ async function generateText(promptText, wantJson) {
   return text;
 }
 
+/* ── AI 분류 분석 (세션 6) ─────────────────────────────────
+   호출 순서: preview.local.js 의 window.PREVIEW_TAXONOMY_AI(선생님이 지정한 새 키/모델)를
+   먼저 시도하고, 없거나 실패하면 검증된 기본 Gemini 설정으로 자동 재시도한다. */
+const TAXONOMY_PROMPT =
+  '당신은 최고의 고생물학·진화생물학 정통 분류학자입니다. '
+  + '첨부된 이미지는 가상 환경에 적응해 진화한 신종 생명체의 극실사 복원 사진입니다.\n\n'
+  + '[분류학 규칙 엄수]\n'
+  + '1. 계(Kingdom)·문(Phylum)·강(Class)·목(Order)·과(Family)는 반드시 현대 생물학 및 고생물학계에 '
+  + '실제로 실존하는(학술적으로 등재된) 정통 분류군만 정확히 판별해 기재하세요. 상위 분류군을 지어내지 마세요.\n'
+  + '2. 속(Genus)·종(Species)은 이번 탐사에서 처음 발견된 신종(가상)이므로 라틴어 이명법 규칙에 따라 학술적으로 명명하세요.\n'
+  + '3. 한국어 명칭과 라틴어 학명을 함께 적으세요.\n\n'
+  + '마크다운 없이 순수 JSON 텍스트만 출력하세요:\n'
+  + '{"koreanName":"국명","scientificName":"Genus species","scientificMeaning":"학명 어원·의미 해설",'
+  + '"habitat":"추정 서식 환경 및 지질 시대",'
+  + '"taxonomy":{"kingdom":"계(실존 학술명, 예: 동물계 Animalia)","phylum":"문(실존, 예: 척삭동물문 Chordata)",'
+  + '"class":"강(실존, 예: 포유강 Mammalia)","order":"목(실존, 예: 장비목 Proboscidea)","family":"과(실존, 예: 매머드과 Elephantidae)",'
+  + '"genus":"속(가상 신속)","species":"종(가상 신종, Genus species 형태)"},'
+  + '"traits":{"morphology":"핵심 신체·외피 특징 1~2문장","adaptation":"핵심 환경 적응 형질 1~2문장","ecologicalNiche":"생태적 지위(예: 정점 포식자)"}}';
+
+async function callGemini(key, model, promptText, imageUrls) {
+  const parts = [{ text: promptText }];
+  for (const u of (imageUrls || [])) {
+    if (u && /^data:image\/(jpeg|jpg|png|webp);base64,/.test(u)) {
+      const [head, b64] = u.split(',');
+      parts.push({ inlineData: { mimeType: (head.match(/data:([^;]+)/) || [])[1] || 'image/jpeg', data: b64 } });
+    }
+  }
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: 'application/json' } }),
+  });
+  if (!res.ok) {
+    let msg = res.status + '';
+    try { const j = await res.json(); msg = (j.error && j.error.message) || msg; } catch { /* noop */ }
+    throw new Error(msg);
+  }
+  const data = await res.json();
+  const out = ((((data.candidates || [])[0] || {}).content || {}).parts || []).map((p) => p.text || '').join('').trim();
+  return JSON.parse(out.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, ''));
+}
+
+async function generateTaxonomyJson(imageUrl, extraContext) {
+  const prompt = TAXONOMY_PROMPT + (extraContext ? `\n\n[학생이 만든 배경 정보 — 참고용]\n${extraContext}` : '');
+  const errs = [];
+  const alt = (typeof window !== 'undefined' && window.PREVIEW_TAXONOMY_AI) || null;
+  if (alt && (alt.key || alt.geminiKey)) {
+    try {
+      return await callGemini(alt.key || alt.geminiKey, alt.model || 'gemini-3.6-flash', prompt, [imageUrl]);
+    } catch (e) { errs.push('지정 키/모델: ' + (e && e.message ? e.message : e)); }
+  }
+  const base = aiConfig();
+  if (base) {
+    try {
+      return await callGemini(base.geminiKey, base.textModel || 'gemini-2.5-flash', prompt, [imageUrl]);
+    } catch (e) { errs.push('기본 키: ' + (e && e.message ? e.message : e)); }
+  }
+  throw new Error(errs.length ? errs.join(' / ') : 'AI 키가 설정되지 않았습니다');
+}
+
+// {kingdom, phylum, class, order, family} → "동물계 › 척삭동물문 › 포유강 › 장비목 › 매머드과"
+// 각 칸의 "한국어명 Latin" 중 한국어 부분만 취해 카드에 짧게 싣는다.
+function taxonomyLineOf(tax) {
+  if (!tax) return '';
+  const korOnly = (s) => String(s || '').trim().split(/\s+/)[0];
+  return ['kingdom', 'phylum', 'class', 'order', 'family']
+    .map((k) => korOnly(tax[k])).filter(Boolean).join(' › ');
+}
+
 /* ── 플랫폼 담당 블록 (여기서는 실제로 동작하게) ─────────── */
 function mockBlock(block) {
   const wrap = h('div', { class: 'pv-block' });
@@ -786,7 +873,7 @@ function mockBlock(block) {
       return wrap;
 
     case 'quiz': {
-      // 세션 6 종합 퀴즈 = 친구 카드 도감. 실제 퀴즈는 공유의 장에서 카드별로.
+      // 세션 6 종합 퀴즈 = 친구 카드 도감. 실제 퀴즈는 카드 도감에서 카드별로.
       if (block.id === 'final-quiz') {
         wrap.append(h('p', { class: 'pv-block-label' }, label || '친구 카드 도감'));
         const dex = dexState();
@@ -803,7 +890,7 @@ function mockBlock(block) {
         }
         wrap.append(grid);
         wrap.append(h('p', { class: 'pv-quiz-score', text: `획득한 친구 카드: ${owned}개` }));
-        const openBtn = h('button', { class: 'pv-btn-mock', type: 'button', text: '👥 공유의 장에서 풀기' });
+        const openBtn = h('button', { class: 'pv-btn-mock', type: 'button', text: '👥 카드 도감에서 풀기' });
         openBtn.addEventListener('click', () => { SHARE_VIEW = 'class'; render(); });
         wrap.append(openBtn);
         return wrap;
@@ -1036,6 +1123,10 @@ function mockBlock(block) {
       return wrap;
     }
 
+    case 'taxonomy.ai':
+      wrap.append(taxonomyBlock(block));
+      return wrap;
+
     case 'submit': {
       const done = get(block.id) && get(block.id).submittedAt;
       const btn = h('button', { class: 'pv-btn-mock', type: 'button', text: done ? '제출 완료 ✓' : (label || '최종 제출') });
@@ -1050,6 +1141,156 @@ function mockBlock(block) {
       wrap.append(h('p', { class: 'pv-prose', text: `(${block.type} 블록)` }));
       return wrap;
   }
+}
+
+/* ── AI 분류 분석 블록 (세션 6) ───────────────────────────
+   세션 5의 AI 실사 이미지를 분류학자 AI에 보내 국명·학명·린네 7단계·형태/생태를 받는다.
+   결과는 taxonomy 상태에 저장하고, AI 국명 채택 여부(nameChoice)도 함께 기억한다. */
+async function runTaxonomy(status, btn) {
+  const img = (get('ai-image') || {}).url;
+  if (!img || !RASTER_RE.test(img)) {
+    status.textContent = '세션 5에서 만든 AI 실사 이미지가 필요합니다.';
+    if (btn) btn.disabled = false;
+    return;
+  }
+  status.textContent = '분류학자 AI가 형태·골격·서식 환경을 종합해 분류군과 학명을 도출하는 중입니다…';
+  try {
+    const desc = (get('bio-desc') || {}).text || '';
+    const hab = ((get('draw-habitat') || {}).habitat || {}).korName || '';
+    const era = ((get('dating-sim') || {}).problem || {}).era || '';
+    const extra = [desc && `생물 설명: ${desc}`, hab && `부여받은 서식 환경: ${hab}`, era && `측정된 지질 시대: ${era}`]
+      .filter(Boolean).join('\n');
+    const r = await generateTaxonomyJson(img, extra);
+    const prev = get('taxonomy') || {};
+    set('taxonomy', {
+      koreanName: String(r.koreanName || '').trim(),
+      scientificName: String(r.scientificName || '').trim(),
+      scientificMeaning: String(r.scientificMeaning || '').trim(),
+      habitat: String(r.habitat || '').trim(),
+      taxonomy: r.taxonomy || {},
+      traits: r.traits || {},
+      nameChoice: prev.nameChoice || null,
+      analyzedAt: new Date().toISOString(),
+    });
+    updateProgress();
+    await render();
+  } catch (e) {
+    status.textContent = '분류 분석 실패: ' + (e && e.message ? e.message : e);
+    if (btn) btn.disabled = false;
+  }
+}
+
+function taxonomyRankRow(korLabel, engLabel, value, kind) {
+  return h('div', { class: 'pv-tax-row' + (kind === 'coined' ? ' is-coined' : '') },
+    h('span', { class: 'pv-tax-rank' },
+      korLabel,
+      h('span', { class: 'pv-tax-eng', text: ' (' + engLabel + ')' }),
+      kind === 'coined' ? h('span', { class: 'pv-tax-badge', text: '가상 신' + (korLabel === '속' ? '속' : '종') }) : null),
+    h('span', { class: 'pv-tax-val', text: value || '-' }));
+}
+
+function taxonomyResultPanel(t) {
+  const wrap = h('div', { class: 'pv-taxonomy' });
+  const tax = t.taxonomy || {};
+  const tr = t.traits || {};
+
+  wrap.append(h('div', { class: 'pv-tax-head' },
+    h('span', { class: 'pv-tax-kicker', text: 'New Species Identified' }),
+    h('h4', { class: 'pv-tax-kname', text: t.koreanName || '미확인 신종' }),
+    h('p', { class: 'pv-tax-sci', text: t.scientificName || 'Incertae sedis' }),
+    t.scientificMeaning ? h('p', { class: 'pv-tax-mean', text: '어원 · ' + t.scientificMeaning }) : null,
+    t.habitat ? h('p', { class: 'pv-tax-hab', text: '추정 서식·시대 · ' + t.habitat }) : null));
+
+  const table = h('div', { class: 'pv-tax-table' },
+    h('p', { class: 'pv-tax-note', text: '계~과: 실존 분류군 / 속·종: 이번에 명명한 가상 신종' }),
+    taxonomyRankRow('계', 'Kingdom', tax.kingdom),
+    taxonomyRankRow('문', 'Phylum', tax.phylum),
+    taxonomyRankRow('강', 'Class', tax.class),
+    taxonomyRankRow('목', 'Order', tax.order),
+    taxonomyRankRow('과', 'Family', tax.family),
+    taxonomyRankRow('속', 'Genus', tax.genus, 'coined'),
+    taxonomyRankRow('종', 'Species', tax.species, 'coined'));
+  wrap.append(table);
+
+  const traitBox = h('div', { class: 'pv-tax-traits' });
+  if (tr.morphology) traitBox.append(h('p', null, h('b', { text: '신체·외피 · ' }), tr.morphology));
+  if (tr.adaptation) traitBox.append(h('p', null, h('b', { text: '환경 적응 · ' }), tr.adaptation));
+  if (tr.ecologicalNiche) traitBox.append(h('p', null, h('b', { text: '생태적 지위 · ' }), tr.ecologicalNiche));
+  if (traitBox.childNodes.length) wrap.append(traitBox);
+
+  return wrap;
+}
+
+function nameRecoBlock(t) {
+  const wrap = h('div', { class: 'pv-name-reco' });
+  const aiName = (t.koreanName || '').trim();
+  const myName = ((get('bio-name') || {}).text || '').trim();
+  const choice = t.nameChoice;
+
+  wrap.append(h('p', { class: 'pv-block-label', text: 'AI가 지어 준 이름, 쓸까요?' }));
+  wrap.append(h('div', { class: 'pv-name-cmp' },
+    h('div', { class: 'pv-name-col' }, h('span', { class: 'pv-name-tag', text: '내가 지은 이름' }), h('b', { text: myName || '(없음)' })),
+    h('div', { class: 'pv-name-col' }, h('span', { class: 'pv-name-tag', text: 'AI 국명 제안' }), h('b', { text: aiName || '(없음)' }))));
+  wrap.append(h('p', { class: 'pv-prose' },
+    '어느 쪽을 고르든 라틴어 학명 ',
+    h('i', { text: t.scientificName || 'Genus species' }),
+    ' 과(와) 7단계 분류는 마지막 카드에 함께 실립니다.'));
+
+  if (choice === 'ai') {
+    wrap.append(h('p', { class: 'pv-quiz-score', text: `✓ AI 국명 '${aiName}' 을(를) 카드 이름으로 씁니다.` }));
+  } else if (choice === 'keep') {
+    wrap.append(h('p', { class: 'pv-quiz-score', text: `✓ 내가 지은 이름 '${myName}' 을(를) 그대로 씁니다.` }));
+  }
+
+  const btnRow = h('div', { class: 'pv-name-btns' });
+  const useAi = h('button', { class: 'pv-btn-mock', type: 'button', text: `이 이름으로 바꾸기 → ${aiName || '?'}`, disabled: !aiName });
+  useAi.addEventListener('click', () => {
+    set('bio-name', { ...(get('bio-name') || {}), text: aiName });
+    const ci = get('card-info');
+    if (ci && ci.rows) patch('card-info', { rows: { ...ci.rows, name: aiName } });
+    patch('taxonomy', { nameChoice: 'ai' });
+    render();
+  });
+  const keep = h('button', { class: 'pv-btn-mock pv-btn-ghost', type: 'button', text: '내 이름 유지' });
+  keep.addEventListener('click', () => { patch('taxonomy', { nameChoice: 'keep' }); render(); });
+  btnRow.append(useAi, keep);
+  wrap.append(btnRow);
+  return wrap;
+}
+
+function taxonomyBlock(block) {
+  const wrap = h('div', { class: 'pv-aiwrap pv-tax-wrap' });
+  const status = h('p', { class: 'pv-upl-status' });
+  const img = (get('ai-image') || {}).url;
+  const t = get('taxonomy');
+
+  wrap.append(h('p', { class: 'pv-block-label', text: block.label || 'AI 분류 분석' }));
+
+  if (t && t.analyzedAt) {
+    if (img) wrap.append(h('figure', { class: 'pv-ai-shot pv-tax-shot' }, h('img', { src: img, alt: '분류 분석 대상' })));
+    wrap.append(taxonomyResultPanel(t));
+    wrap.append(nameRecoBlock(t));
+    const canRedo = img && RASTER_RE.test(img);
+    const redo = h('button', { class: 'pv-quiz-reveal-btn', type: 'button', text: '다시 분석', disabled: !canRedo });
+    if (canRedo) redo.addEventListener('click', () => { runTaxonomy(status, redo); });
+    wrap.append(redo, status);
+    return wrap;
+  }
+
+  if (!img || !RASTER_RE.test(img)) {
+    wrap.append(h('p', { class: 'pv-prose', text: '세션 5에서 AI 실사 이미지를 먼저 완성해야 분류 분석을 할 수 있습니다.' }));
+    return wrap;
+  }
+
+  const go = h('button', { class: 'pv-btn-mock', type: 'button', text: 'AI 분류 분석 시작' });
+  go.addEventListener('click', () => { go.disabled = true; runTaxonomy(status, go); });
+  wrap.append(
+    h('figure', { class: 'pv-ai-shot pv-tax-shot' }, h('img', { src: img, alt: '분류 분석 대상' })),
+    h('p', { class: 'pv-prose', text: '위 AI 실사 사진을 분류학자 AI에게 보내 계·문·강·목·과와 라틴어 학명을 도출합니다.' }),
+    go, status,
+    h('p', { class: 'pv-caution', text: '분석할 때마다 AI 호출 비용이 발생합니다. 실사 이미지를 확정한 뒤 눌러 주세요.' }),
+  );
+  return wrap;
 }
 
 /* ── 신규 블록 3종 (배포되는 핸들러 그대로) ──────────────── */
@@ -1097,7 +1338,7 @@ function go(i) {
   render().then(() => window.scrollTo(0, 0));
 }
 
-/* ── 공유의 장 (가상 동급생 진행·제출 보기 / 친구 카드 / 도감북) ── */
+/* ── 카드 도감 (가상 동급생 진행·제출 보기 / 친구 카드 / 도감북) ── */
 let SHARE_VIEW = null; // null=닫힘, 'class'=반 전체, 'dex'=내 도감북, peerId=상세
 
 function creatureCardEl(prof, opts) {
@@ -1115,6 +1356,8 @@ function creatureCardEl(prof, opts) {
   const nameEl = h('div', { class: 'fx-card-name' + (cols.length ? ' fx-card-name--bar' : ''), text: prof.creatureName });
   if (cols.length) nameEl.style.background = typeBarStyle(cols);
   card.append(nameEl);
+  if (prof.scientificName) card.append(h('div', { class: 'fx-card-sci', text: prof.scientificName }));
+  if (prof.taxonomyLine) card.append(h('div', { class: 'fx-card-taxa', text: prof.taxonomyLine }));
   card.append(h('div', { class: 'fx-card-meta' },
     h('span', { text: '타입 ' + (ci.type || '-') }), h('span', { text: '서식지 ' + (ci.habitat || prof.habitat || '-') })));
   if (opts && opts.onClick) { card.style.cursor = 'pointer'; card.addEventListener('click', opts.onClick); }
@@ -1137,7 +1380,7 @@ function sharePanel() {
   };
   tabs.append(tab('class', '반 전체'), tab('dex', '내 도감북'));
 
-  panel.append(h('div', { class: 'pv-share-head' }, h('h2', { text: '공유의 장' }), tabs, close));
+  panel.append(h('div', { class: 'pv-share-head' }, h('h2', { text: '카드 도감' }), tabs, close));
 
   const body = h('div', { class: 'pv-share-body' });
   const students = allStudents();
@@ -1365,12 +1608,21 @@ function topbar() {
   seed.addEventListener('click', async () => { seed.disabled = true; await seedState(); await render(); });
   const reset = h('button', { class: 'pv-seed-btn', type: 'button', text: '빈 수업으로 보기' });
   reset.addEventListener('click', async () => { _clear(); _autoMatchFired.clear(); await render(); });
-  const share = h('button', { class: 'pv-share-btn', type: 'button', text: '👥 공유의 장' });
+  const share = h('button', { class: 'pv-share-btn', type: 'button', text: '👥 카드 도감' });
   share.addEventListener('click', () => { SHARE_VIEW = SHARE_VIEW == null ? 'class' : null; render(); });
+
+  const done = studentComplete();
+  const s = studentInfo();
+  const who = h('span', {
+    class: 'pv-topbar-who', hidden: !done,
+    title: done ? '식별 코드 · ' + studentCode() : '',
+    text: done ? `${s.id} · ${s.name} · ${s.school}` : '',
+  });
 
   return h('div', { class: 'pv-topbar' },
     h('div', { class: 'pv-topbar-inner' },
       h('p', { class: 'pv-topbar-title' }, '화석으로 알아보는 생물 탐구 ', h('span', { text: '· 수업 시안' })),
+      who,
       h('div', { class: 'pv-progress' }, h('div', { class: 'pv-progress-fill', id: 'pv-fill' })),
       share, seed, reset,
     ));
@@ -1442,6 +1694,7 @@ function blockDone(id) {
       if (id === 'final-quiz') return (dexState().owned || []).length >= 1;
       return typeof (v || {}).correct === 'number';
     case 'ai.collect': return !!(get('ai-image') || {}).url;
+    case 'taxonomy.ai': return !!(v && v.analyzedAt);
     case 'compare': return true;
     default: return true;
   }
@@ -1449,7 +1702,12 @@ function blockDone(id) {
 
 // 현재 화면(단계)의 advance.requires 가 모두 충족됐는가
 function screenGate(i) {
-  if (i === 0 || i === screenCount() - 1) return { ok: true };
+  if (i === 0) {
+    return studentComplete()
+      ? { ok: true }
+      : { ok: false, missing: [], reason: '먼저 표지에서 ' + studentIssues().join(', ') + ' 을(를) 입력하세요.' };
+  }
+  if (i === screenCount() - 1) return { ok: true };
   const { step } = stepList()[i - 1];
   const req = (step.advance && step.advance.requires) || [];
   const missing = req.filter((id) => !blockDone(id));
@@ -1468,7 +1726,8 @@ function navRow() {
   next.addEventListener('click', () => {
     const g = screenGate(CUR);
     if (g.ok) { go(CUR + 1); return; }
-    hint.textContent = '다음으로 가려면 완료해야 합니다: ' + g.missing.map((id) => blockLabel(id)).join(', ');
+    hint.textContent = g.reason
+      || ('다음으로 가려면 완료해야 합니다: ' + g.missing.map((id) => blockLabel(id)).join(', '));
     hint.hidden = false;
   });
 
@@ -1478,6 +1737,81 @@ function navRow() {
       h('span', { class: 'pv-nav-count', text: CUR === 0 ? '표지' : CUR === last ? '마무리' : `${CUR} / ${stepList().length}` }),
       next),
     hint);
+}
+
+/* ── 학생 정보 (표지) ──────────────────────────────────────
+   학번(5자리)+이름+소속학교 = 이 활동 산출물 묶음의 고유 식별 코드.
+   시안에서는 브라우저에만 저장. 실제 뮤즈엑스 플랫폼에서는 로그인 정보로 대체된다. */
+function studentInfo() { return get('student') || {}; }
+
+function studentIssues() {
+  const s = studentInfo();
+  const out = [];
+  if (!/^\d{5}$/.test(String(s.id || '').trim())) out.push('학번(숫자 5자리)');
+  if (!String(s.name || '').trim()) out.push('이름');
+  const school = String(s.school || '').trim();
+  if (school.length < 4 || !school.includes('학교')) out.push("소속학교(정식 명칭, '…학교'까지)");
+  return out;
+}
+function studentComplete() { return studentIssues().length === 0; }
+
+function studentCode() {
+  const s = studentInfo();
+  return [s.id, s.name, s.school].map((x) => String(x || '').trim()).join('-');
+}
+
+function refreshStudentCodeChip() {
+  const done = studentComplete();
+  const chip = document.getElementById('pv-student-code');
+  if (chip) {
+    chip.hidden = !done;
+    chip.textContent = done ? '식별 코드 · ' + studentCode() : '';
+  }
+  const who = document.querySelector('.pv-topbar-who');
+  if (who) {
+    who.hidden = !done;
+    if (done) {
+      const s = studentInfo();
+      who.textContent = `${s.id} · ${s.name} · ${s.school}`;
+      who.title = '식별 코드 · ' + studentCode();
+    }
+  }
+  const nav = document.querySelector('.pv-nav-hint');
+  if (nav && done) nav.hidden = true;
+}
+
+function studentInfoBlock() {
+  const wrap = h('div', { class: 'pv-student' });
+  const s = studentInfo();
+  wrap.append(h('p', { class: 'pv-block-label', text: '먼저 내 정보를 입력하세요' }));
+  wrap.append(h('p', { class: 'pv-prose', text:
+    '학번·이름·소속학교는 이 활동에서 만드는 모든 자료(화석 사진·조사 글·손그림·AI 실사·분류·수집 카드)를 '
+    + '하나로 묶는 고유 식별 코드가 됩니다. 소속학교는 정식 명칭을 정확히 적어 주세요.' }));
+
+  const field = (key, labelText, placeholder, numeric) => {
+    const inp = h('input', {
+      class: 'pv-field pv-student-input', type: 'text', placeholder,
+      value: s[key] || '', maxLength: numeric ? 5 : 40,
+      inputMode: numeric ? 'numeric' : 'text', autocomplete: 'off',
+    });
+    inp.addEventListener('input', () => {
+      if (numeric) { inp.value = inp.value.replace(/\D/g, '').slice(0, 5); }
+      patch('student', { [key]: inp.value });
+      refreshStudentCodeChip();
+    });
+    return h('label', { class: 'pv-student-row' }, h('span', { text: labelText }), inp);
+  };
+
+  wrap.append(h('div', { class: 'pv-student-grid' },
+    field('id', '학번 (숫자 5자리)', '예: 30514', true),
+    field('name', '이름', '예: 홍길동', false),
+    field('school', '소속학교 (정식 명칭)', '예: 국립중앙과학중학교', false)));
+
+  wrap.append(h('p', {
+    id: 'pv-student-code', class: 'pv-student-code', hidden: !studentComplete(),
+    text: studentComplete() ? '식별 코드 · ' + studentCode() : '',
+  }));
+  return wrap;
 }
 
 function hero() {
@@ -1493,6 +1827,7 @@ function hero() {
         h('span', null, h('b', { text: '모둠 ' }), groupText(m.groupMode)),
         h('span', null, h('b', { text: '세션 ' }), `${m.sessions.length}개`),
       )),
+    studentInfoBlock(),
     h('p', { class: 'pv-note', text:
       '이 페이지에서 수업 전체를 직접 해볼 수 있습니다. 사진·손그림을 올리고, 글을 쓰고, 퀴즈를 풀면 '
       + (aiConfig()
@@ -1568,9 +1903,14 @@ function finale() {
 
   return h('div', { class: 'pv-finale' + (complete ? ' is-complete' : '') },
     h('p', { class: 'pv-finale-title', text: complete ? '수업 완료 — 산출물이 모두 모였습니다' : `진행 중 · 산출물 ${done}/${refs.length}` }),
+    studentComplete()
+      ? h('p', { class: 'pv-prose' }, h('b', { text: '식별 코드 · ' }), studentCode(),
+        ' — 아래 산출물 묶음이 이 코드로 저장됩니다.')
+      : h('p', { class: 'pv-prose', text: '표지에서 학번·이름·소속학교를 입력하면 산출물이 그 코드로 묶입니다.' }),
     h('p', { class: 'pv-prose', text:
-      '학생이 만든 것: 화석 사진 · 서식환경 · 연대 측정 · 환경 조사표 · 손그림 · AI 실사 이미지 · 5등급 수집 카드' }),
-    h('p', { class: 'pv-prose', text: '내보내기: ' + exp.map((e) => expName[e] || e).join(' · ') }),
+      '학생이 만든 것: 화석 사진 · 서식환경 · 연대 측정 · 환경 조사표 · 손그림 · AI 실사 이미지 · AI 분류(린네 7단계 + 학명) · 5등급 수집 카드' }),
+    h('p', { class: 'pv-prose', text: '내보내기: ' + exp.map((e) => expName[e] || e).join(' · ')
+      + ' — 검토용 시안에서는 브라우저에만 저장되고, 실제 플랫폼에서 PDF/ZIP/CSV로 아카이빙됩니다.' }),
   );
 }
 
@@ -1602,6 +1942,8 @@ function updateProgress() {
 /* ── 검토용 상태 시드 ──────────────────────────────────── */
 async function seedState() {
   const data = await loadFossilData();
+
+  set('student', { id: '30514', name: '김하늘', school: '국립중앙과학중학교' });
 
   // 신규 블록 3종도 완료 상태로 — 서식환경 뽑기 / 연대측정 제출 / 카드 개봉
   const habitat = data.habitats.find((x) => x.korName.includes('툰드라')) || data.habitats[2];
@@ -1667,6 +2009,24 @@ async function seedState() {
   } });
   set('ai-image', { url: PLACEHOLDER_IMG });
   set('sketch-vs-ai', { feedback: '털 색이 환경과 잘 어울리고 실루엣도 유지됐다. 뿔 끝이 조금 더 뾰족했으면.' });
+  set('taxonomy', {
+    koreanName: '눈보라코뿔소',
+    scientificName: 'Coelodonta nivalis',
+    scientificMeaning: "속명 'Coelodonta'는 그리스어로 '속이 빈 이빨', 종소명 'nivalis'는 라틴어로 '눈(雪)의'라는 뜻 — 눈 덮인 툰드라에 적응한 특징을 담았다.",
+    habitat: '후기 플라이스토세 빙하기 툰드라 (매머드 스텝)',
+    taxonomy: {
+      kingdom: '동물계 Animalia', phylum: '척삭동물문 Chordata', class: '포유강 Mammalia',
+      order: '기제목 Perissodactyla', family: '코뿔소과 Rhinocerotidae',
+      genus: 'Coelodonta', species: 'Coelodonta nivalis',
+    },
+    traits: {
+      morphology: '두 개의 각질 뿔과 촘촘한 겉털·두꺼운 피하지방으로 덮인 대형 초식동물.',
+      adaptation: '넓적한 앞뿔로 눈을 파헤쳐 그 아래 이끼를 먹고, 넓은 발굽으로 눈 위를 빠지지 않고 걷는다.',
+      ecologicalNiche: '대형 초식동물(1차 소비자) · 매머드 스텝의 우점 방목자',
+    },
+    nameChoice: null,
+    analyzedAt: new Date().toISOString(),
+  });
 
   // 예시: 친구 카드 2개 획득 + 세션6 게이트 통과
   set('pv-dex', { owned: ['p3', 'p1'], quizzes: {} });

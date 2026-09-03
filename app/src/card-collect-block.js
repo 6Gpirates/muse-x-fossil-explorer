@@ -62,6 +62,15 @@ function starString(n) {
   return '★'.repeat(n) + '☆'.repeat(5 - n);
 }
 
+// {kingdom, phylum, class, order, family} → "동물계 › 척삭동물문 › 포유강 › 장비목 › 매머드과"
+// 각 칸이 "한국어명 Latin" 형태면 한국어 부분만 취해 카드에 짧게 싣는다.
+export function taxonomyLine(ranks) {
+  if (!ranks || typeof ranks !== 'object') return '';
+  const korOnly = (s) => String(s || '').trim().split(/\s+/)[0];
+  return ['kingdom', 'phylum', 'class', 'order', 'family']
+    .map((k) => korOnly(ranks[k])).filter(Boolean).join(' › ');
+}
+
 export const cardCollect = {
   async render(block, ctx) {
     const root = document.createElement('div');
@@ -124,6 +133,7 @@ export const cardCollect = {
     const info = readRef(ctx, block.infoRef) || {};
     const infoRows = info.rows || info.fields || info;
     const image = readRef(ctx, block.imageRef);
+    const tax = (block.taxonomyRef && readRef(ctx, block.taxonomyRef)) || null;
     const snapshot = {
       name: infoRows['이름'] || infoRows.name || '이름 없음',
       type: infoRows['타입'] || infoRows.type || '',
@@ -132,6 +142,8 @@ export const cardCollect = {
       ability: infoRows['특수 능력'] || infoRows.ability || '',
       weakness: infoRows['약점'] || infoRows.weakness || '',
       image: (image && (image.url || image.dataURL || image)) || '',
+      scientificName: (tax && tax.scientificName) || '',
+      taxonomyLine: taxonomyLine(tax && tax.taxonomy),
     };
 
     const value = {
@@ -181,6 +193,19 @@ export const cardCollect = {
         : s.typeColors[0];
     }
     card.appendChild(nameDiv);
+
+    if (s.scientificName) {
+      const sci = document.createElement('div');
+      sci.className = 'fx-card-sci';
+      sci.textContent = s.scientificName;
+      card.appendChild(sci);
+    }
+    if (s.taxonomyLine) {
+      const taxa = document.createElement('div');
+      taxa.className = 'fx-card-taxa';
+      taxa.textContent = s.taxonomyLine;
+      card.appendChild(taxa);
+    }
 
     const metaDiv = document.createElement('div');
     metaDiv.className = 'fx-card-meta';

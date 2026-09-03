@@ -1,13 +1,13 @@
 {
   "id": "p6-fossil-explorer",
   "version": "0.1.0",
-  "_note": "화석으로 알아보는 생물 탐구. 신규 블록 draw.habitat / dating.sim / card.collect 필요. 번호·index 위치는 총괄자 확정 대상.",
+  "_note": "화석으로 알아보는 생물 탐구. 신규 블록 draw.habitat / dating.sim / taxonomy.ai / card.collect 필요. 번호·index 위치는 총괄자 확정 대상.",
   "title": "화석으로 알아보는 생물 탐구",
-  "subtitle": "화석 채집 → 환경·연대 뽑기 → 조사 → 상상해 그리기 → AI 실사화 → 수집 카드",
+  "subtitle": "화석 채집 → 환경·연대 뽑기 → 조사 → 상상해 그리기 → AI 실사화 → AI 분류 → 수집 카드",
   "gradeBand": "middle",
   "hall": "자연사관 · 화석 전시",
   "aiType": "image",
-  "estimatedMinutes": 180,
+  "estimatedMinutes": 210,
   "groupMode": "solo-or-pair",
   "sessions": [
     {
@@ -110,9 +110,20 @@
       ]
     },
     {
-      "id": "s6", "no": 6, "title": "카드를 완성하고 나누다", "tagline": "내 카드 완성 + 친구 카드 모으기",
+      "id": "s6", "no": 6, "title": "이 생물은 어떻게 분류될까?", "tagline": "AI 분류학 연구소 — 린네 7단계 분류와 학명",
       "steps": [
-        { "id": "s6-01", "phase": "collect", "title": "내 카드 만들기",
+        { "id": "s6-01", "phase": "ai", "title": "AI 분류 분석",
+          "blocks": [
+            { "type": "text", "tone": "plain", "body": "완성된 AI 실사 사진을 분류학자 AI에게 보냅니다.\n· 계·문·강·목·과 — 생물학·고생물학계에 실제로 존재하는(학술적으로 등재된) 정통 분류군만 판별합니다.\n· 속·종 — 이번 탐사에서 처음 발견된 신종이므로 라틴어 이명법 규칙에 따라 새로 이름을 지어 줍니다.\n분석이 끝나면 AI가 지어 준 국명을 그대로 쓸지 직접 정할 수 있고, 라틴어 학명과 7단계 분류는 마지막 카드에 함께 실립니다." },
+            { "type": "taxonomy.ai", "id": "taxonomy", "label": "AI 분류 분석", "imageRef": "ai-image", "nameRef": "bio-name" }
+          ],
+          "advance": { "requires": ["taxonomy"] } }
+      ]
+    },
+    {
+      "id": "s7", "no": 7, "title": "카드를 완성하고 나누다", "tagline": "내 카드 완성 + 친구 카드 모으기",
+      "steps": [
+        { "id": "s7-01", "phase": "collect", "title": "내 카드 만들기",
           "blocks": [
             { "type": "text", "tone": "plain", "body": "완성된 그림과 AI 이미지를 바탕으로 카드를 완성합니다. 이름과 서식지는 앞에서 정한 대로 들어가고, 타입·특수 능력·약점은 AI가 그림을 보고 정해 줍니다. 만들면 카드 결과가 바로 나옵니다." },
             { "type": "input.table", "id": "card-info", "label": "카드에 넣을 정보",
@@ -123,6 +134,7 @@
               ] },
             { "type": "card.collect", "id": "card-collect", "label": "내 생물 카드",
               "imageRef": "ai-image", "infoRef": "card-info", "quizRef": "final-quiz", "rarityRef": "rarity",
+              "taxonomyRef": "taxonomy",
               "quizCount": 5,
               "_signalNote": "bio-desc/quizscore = 적응 진화 점수(4-2, 100점). 이 수업의 핵심 평가라 가장 큰 가중치.",
               "signals": [
@@ -136,10 +148,10 @@
               ] }
           ],
           "advance": { "requires": ["card-info", "card-collect"] } },
-        { "id": "s6-02", "phase": "quiz", "title": "친구 카드 도감",
+        { "id": "s7-02", "phase": "quiz", "title": "친구 카드 도감",
           "blocks": [
             { "type": "text", "tone": "plain", "body": "친구들이 만든 카드를 살펴보고, 각 카드에 대한 과학 퀴즈에서 3개 이상 맞히면 그 카드를 내 도감북에 넣을 수 있습니다." },
-            { "type": "quiz", "id": "final-quiz", "label": "친구 카드 도감", "questions": [{"key":"f1","q":"자리표시자","choices":["a","b","c","d"],"answer":0,"why":"공유의 장에서 카드별로 생성됩니다."}] },
+            { "type": "quiz", "id": "final-quiz", "label": "친구 카드 도감", "questions": [{"key":"f1","q":"자리표시자","choices":["a","b","c","d"],"answer":0,"why":"카드 도감에서 카드별로 생성됩니다."}] },
             { "type": "submit", "id": "final-submit", "label": "최종 제출" }
           ],
           "advance": { "requires": [] } }
@@ -147,7 +159,7 @@
     }
   ],
   "deliverable": {
-    "collect": ["fossil-photo", "draw-habitat", "dating-sim", "env-research", "common-traits", "mid-quiz", "era-research", "sketch", "bio-name", "bio-desc", "card-info", "ai-image", "sketch-vs-ai", "final-quiz", "card-collect"],
+    "collect": ["fossil-photo", "draw-habitat", "dating-sim", "env-research", "common-traits", "mid-quiz", "era-research", "sketch", "bio-name", "bio-desc", "card-info", "ai-image", "sketch-vs-ai", "taxonomy", "final-quiz", "card-collect"],
     "export": ["pdf", "zip", "csv"]
   }
 }

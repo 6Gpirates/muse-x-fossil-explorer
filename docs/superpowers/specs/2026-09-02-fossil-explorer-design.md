@@ -97,6 +97,11 @@
 
 > 번호(`p6`)와 `index.json` 삽입 위치는 **잠정**. 최종은 총괄자 결정.
 
+> **학생 식별 / 아카이빙** (2026-09-03 추가): 검토용 시안(`preview.html`)은 표지에서
+> 학번(5자리)·이름·소속학교(정식 명칭)를 받아 `학번-이름-학교`를 산출물 묶음의 고유 식별 코드로 쓴다.
+> 실제 뮤즈엑스 플랫폼에서는 로그인 정보가 이를 대신한다. 산출물 아카이빙은 프로그램의
+> `deliverable`(`collect` 나열 id + `export: ["pdf","zip","csv"]`)이 담당하며, 이 저장소에는 서버·DB가 없다.
+
 ### 세션 1 — 화석을 채집하다
 | step | 블록 | 내용 |
 |---|---|---|
@@ -140,14 +145,25 @@
 | s5-02 | `compare` | 손그림 ↔ 실사. `left.ref:"sketch"`, `right.ref:"ai-image"`, checks: 실루엣/비율/특징 반영 여부 |
 | `advance.requires: ["ai-image"]` |
 
-### 세션 6 — 카드를 획득하다
+### 세션 6 — 이 생물은 어떻게 분류될까? (AI 분류학 연구소)
+> 추가: 2026-09-03. 시연 피드백 이후 세션 5(AI 실사화)와 카드 세션 사이에 삽입,
+> 기존 세션 6은 세션 7로 밀림. 아래 표는 이후 UI 반복 이전의 초안 흐름이라 실물 `p6-fossil-explorer.json`이 최종 기준.
+
 | step | 블록 | 내용 |
 |---|---|---|
-| s6-01 | `text` | "퀴즈를 통과하면 나만의 생물 카드를 개봉합니다" |
-| s6-01 | `quiz` | 종합 퀴즈(id: `final-quiz`, 5문항, `finalQuiz`). 통과 = 전 문항 응답(점수는 등급에 반영) |
-| s6-02 | **`card.collect`** | 실사 이미지 + 카드 정보 + 퀴즈 결과 → 5등급 수집 카드 개봉 |
-| s6-02 | `submit` | 최종 제출 |
-| `advance.requires: ["final-quiz", "card-collect"]` |
+| s6-01 | `text` | 분석 규칙 안내 — 계~과는 실존 분류군, 속·종은 라틴어 이명법 신종 |
+| s6-01 | **`taxonomy.ai`** (신규) | 세션 5의 AI 실사 이미지(`imageRef: "ai-image"`)를 분류학자 AI에 보내 국명·학명·어원·린네 7단계·형태/생태를 받음. 결과 저장 키 `taxonomy`. AI가 지은 국명을 채택할지 학생이 선택(`nameChoice`), 학명·7단계는 최종 카드에 병기 |
+| `advance.requires: ["taxonomy"]` (분석 1회 완료) |
+
+- 플랫폼이 구현할 신규 블록. 시안(`preview.js`)에서는 `window.PREVIEW_TAXONOMY_AI`(선생님 지정 키/모델) → 실패 시 기본 Gemini 설정으로 폴백해 실제 호출.
+- 카드 스냅샷에 `scientificName`, `taxonomyLine`(계~과 한국어명 `›` 결합) 추가 — `card.collect` 블록에 `taxonomyRef: "taxonomy"`.
+
+### 세션 7 — 카드를 획득하다
+| step | 블록 | 내용 |
+|---|---|---|
+| s7-01 | **`card.collect`** | 실사 이미지 + 카드 정보 + 분류 결과 + 퀴즈 결과 → 5등급 수집 카드 개봉 (학명·7단계 분류 병기) |
+| s7-02 | `quiz` | 친구 카드 도감 퀴즈(id: `final-quiz`) |
+| s7-02 | `submit` | 최종 제출 |
 
 `deliverable.collect`:
 `["fossil-photo","draw-habitat","dating-sim","env-research","common-traits","sketch","card-info","ai-image","compare","final-quiz","card-collect"]`

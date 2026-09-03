@@ -2,16 +2,17 @@
 
 뮤즈엑스(MuseX) 학습 플랫폼 — **화석으로 알아보는 생물 탐구** 수업 모듈.
 
-국립중앙과학관 화석 전시 연계. 학생이 화석을 촬영 → 무작위 서식환경 배정 →
-방사성 연대 측정 → 환경 조사 → 생물 상상해 그리기 → AI 극실사화 →
-5등급 홀로그램 수집 카드 획득(퀴즈 통과).
+국립중앙과학관 화석 전시 연계. 7세션 흐름: 학생이 화석을 촬영 → 무작위 서식환경 배정 →
+방사성 연대 측정 → 환경·지질시대 조사 → 생물 상상해 그리기 → AI 극실사화 →
+AI 분류 분석(린네 7단계 + 라틴어 학명) → 5등급 홀로그램 수집 카드 획득(퀴즈 통과).
 
 ## 구성
 
 - `app/src/draw-habitat-block.js` · `dating-sim-block.js` · `card-collect-block.js` — 신규 블록 3종
 - `app/src/rarity.js` — 카드 등급 계산(실력 70% + 운 30%)
 - `app/content/fossil-explorer.json` — 서식환경·연대문제·퀴즈·등급 구간·극실사 프롬프트
-- `app/programs/p6-fossil-explorer.json` — 6세션 수업 흐름
+- `app/programs/p6-fossil-explorer.json` — 7세션 수업 흐름 (세션 6 = `taxonomy.ai` AI 분류 분석)
+- `app/preview.html` — 검토용 수업 시안(전 과정 인터랙티브, `preview.js`)
 - `app/demo.html` — 단독 데모
 
 ## 로컬 실행
