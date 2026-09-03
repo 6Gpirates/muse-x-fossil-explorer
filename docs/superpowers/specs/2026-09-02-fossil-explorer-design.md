@@ -312,8 +312,9 @@ muse-x-fossil-explorer/
 │  │  ├─ dating-sim-block.js
 │  │  ├─ card-collect-block.js
 │  │  ├─ rarity.js                             (등급 계산 순수 함수 — 단위 테스트 대상)
+│  │  ├─ preview.js                            (검토용 수업 시안 — 7세션 전 과정, 목 ctx/state)
 │  │  └─ fossil-explorer.css                   (홀로그램·포일·뽑기 연출)
-│  └─ demo.html                                (3블록 단독 구동 데모, 목 ctx/state)
+│  └─ preview.html                             (시안 진입점. 초기 demo.html/demo.js 는 2026-09-03 삭제)
 ├─ integration/
 │  ├─ blocks-js.merge.json                     (블록 3종 등록: import / factory / registry)
 │  ├─ programs-index.merge.json                (index.json 에 p6 항목 append + ready:true)
@@ -363,7 +364,7 @@ muse-x-fossil-explorer/
 - `dating-sim`: 5문제 채점, 콤마·단위 입력 정규화, 재방문 시 문제 고정.
 - `draw-habitat`: 잠금 후 불변, `summary` 형식.
 - 블록 규격: 3블록 모두 `render/complete/missing/summary` 존재, `summary.kind ∈ {table, image, null}`.
-- `demo.html`: 목 ctx/state 로 6세션 수동 시연.
+- `preview.html`: 목 ctx/state 로 7세션 전 과정 수동 시연(검토용 시안).
 - 런타임 의존성 0 — `node --test` 로 실행.
 
 ## 12. 역설계 미확인 항목 (구현 중 실물 대조 필수)

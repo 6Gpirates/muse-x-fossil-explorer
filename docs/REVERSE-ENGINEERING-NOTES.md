@@ -23,8 +23,9 @@ Plan 1(핵심 모듈)은 뮤즈엑스 라이브 사이트(`muse-x-two.vercel.app
 
 ## 병합 시 하지 말 것
 
-- `app/src/state.js` 를 플랫폼에 복사하지 말 것 — 개발/데모 전용. 플랫폼 `state.js` 사용.
-- `app/demo.html` / `app/src/demo.js` — 데모 전용, 병합 안 함.
+- `app/src/state.js` 를 플랫폼에 복사하지 말 것 — 개발/시안 전용. 플랫폼 `state.js` 사용.
+- `app/preview.html` / `app/src/preview.js` — 검토용 시안. 플랫폼에 병합하지 않음(플랫폼이 렌더 담당).
+  (초기 개발용 `app/demo.html` / `app/src/demo.js` 는 2026-09-03 삭제 — preview 가 전 과정을 포함.)
 - `app/content/fossil-explorer.json` 의 `datingProblems` 값 — **선생님 원본**. 임의 수정 금지.
   (지질시대 라벨 2건은 2026-09-02 선생님 승인 하에 과학적으로 정정 완료:
   5,700 BP → 홀로세 / 75,000 BP → 후기 플라이스토세. 150,000 BP 는 중기 플라이스토세로 유지(정확).
